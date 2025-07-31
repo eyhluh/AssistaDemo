@@ -43,7 +43,7 @@ const AppHeader = () => {
                   alt="FlowBite Logo"
                 /> */}
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
-                  Alovera's Demo
+                  Bolvider's Demo
                 </span>
               </a>
             </div>
