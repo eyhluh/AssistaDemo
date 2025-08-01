@@ -88,12 +88,18 @@ const GenderList: FC<GenderListProps> = ({ refreshKey }) => {
                       {gender.gender}
                     </TableCell>
                     <TableCell className="px-5 py-3 text-center">
-                      <div className="flex justify-center items-center">
+                      <div className="flex justify-center items-center gap-4">
                         <Link
                           to={`/gender/edit/${gender.gender_id}`}
                           className="text-green-600 hover-underline font-medium"
                         >
                           Edit
+                        </Link>
+                        <Link
+                          to={`/gender/delete/${gender.gender_id}`}
+                          className="text-red-600 hover-underline font-medium"
+                        >
+                          Delete
                         </Link>
                       </div>
                     </TableCell>

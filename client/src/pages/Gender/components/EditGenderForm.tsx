@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FC, type FormEvent } from "react";
 import BackButton from "../../../components/Button/BackButton";
 import SubmitButton from "../../../components/Button/SubmitButton";
 import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
 import type { GenderFieldErrors } from "../../../interfaces/GenderFieldErrors";
 import GenderService from "../../../services/GenderService";
 import { useParams } from "react-router-dom";
+import Spinner from "../../../components/Spinner/Spinner";
 
-const EditGenderForm = () => {
+interface EditGenderFormProps {
+  onGenderUpdated: (message: string) => void;
+}
+
+const EditGenderForm: FC<EditGenderFormProps> = ({ onGenderUpdated }) => {
   const { gender_id } = useParams();
   const [loadingGet, setLoadingGet] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -36,6 +41,38 @@ const EditGenderForm = () => {
     }
   };
 
+  const handleUpdateGender = async (e: FormEvent) => {
+    try {
+      e.preventDefault();
+
+      setLoadingUpdate(true);
+
+      const res = await GenderService.updateGender(gender_id!, { gender });
+
+      if (res.status === 200) {
+        setErrors({});
+        setGender(res.data.gender.gender);
+        onGenderUpdated(res.data.message);
+      } else {
+        console.error(
+          "Unexpected error occurred during updating gender: ",
+          res.data
+        );
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 422) {
+        setErrors(error.response.data.errors);
+      } else {
+        console.error(
+          "Unexpected server error occurred during updating gender: ",
+          error
+        );
+      }
+    } finally {
+      setLoadingUpdate(false);
+    }
+  };
+
   useEffect(() => {
     if (gender_id) {
       const parseGenderId = parseInt(gender_id);
@@ -50,15 +87,35 @@ const EditGenderForm = () => {
 
   return (
     <>
-      <form>
-        <div className="mb-4">
-          <FloatingLabelInput label="Gender" type="text" name="gender" />
+      {loadingGet ? (
+        <div className="flex justify-center items-center mt-52">
+          <Spinner size="lg" />
         </div>
-        <div className="flex justify-end gap-2">
-          <BackButton label="Back" path="/" />
-          <SubmitButton label="Save Gender" />
-        </div>
-      </form>
+      ) : (
+        <form onSubmit={handleUpdateGender}>
+          <div className="mb-4">
+            <FloatingLabelInput
+              label="Gender"
+              type="text"
+              name="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              errors={errors.gender}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            {!loadingUpdate && <BackButton label="Back" path="/" />}
+
+            <SubmitButton
+              label="Edit Gender"
+              loading={loadingUpdate}
+              loadingLabel="Upadting Gender..."
+            />
+          </div>
+        </form>
+      )}
     </>
   );
 };

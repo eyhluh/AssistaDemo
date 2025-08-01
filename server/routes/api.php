@@ -8,6 +8,8 @@ Route::controller(GenderController::class)->prefix('/gender')->group(function ()
     Route::get('/loadGenders', 'loadGenders');
     Route::get('/getGender/{genderId}', 'getGender');
     Route::post('/storeGender', 'storeGender');
+    Route::put('/updateGender/{gender}', 'updateGender');
+    Route::put('/destroyGender/{gender}', 'destroyGender');
 });
 
     
