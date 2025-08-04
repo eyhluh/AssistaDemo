@@ -12,84 +12,6 @@ interface AddUserModalProps {
 }
 
 const UserList: FC<AddUserModalProps> = ({ onAddUser }) => {
-  const users = [
-    {
-      no: 1,
-      first_name: "John",
-      middle_name: "",
-      last_name: "Doe",
-      suffix_name: "",
-      gender: "Male",
-      address: "Roxas City",
-      action: (
-        <>
-          <div className="flex gap-4">
-            <div>
-              <button className="text-green-600 hover:underline font-medium">
-                Edit
-              </button>
-            </div>
-            <div>
-              <button className="text-red-600 hover:underline font-medium">
-                Delete
-              </button>
-            </div>
-          </div>
-        </>
-      ),
-    },
-    {
-      no: 2,
-      first_name: "Mikha",
-      middle_name: "Bini",
-      last_name: "Lim",
-      suffix_name: "",
-      gender: "Female",
-      address: "Iloilo City",
-      action: (
-        <>
-          <div className="flex gap-4">
-            <div>
-              <button className="text-green-600 hover:underline font-medium">
-                Edit
-              </button>
-            </div>
-            <div>
-              <button className="text-red-600 hover:underline font-medium">
-                Delete
-              </button>
-            </div>
-          </div>
-        </>
-      ),
-    },
-    {
-      no: 1,
-      first_name: "Johnathan",
-      middle_name: "Baba Yaga",
-      last_name: "Doe",
-      suffix_name: "Jr.",
-      gender: "Prefer Not to Say",
-      address: "Lawaan",
-      action: (
-        <>
-          <div className="flex gap-4">
-            <div>
-              <button className="text-green-600 hover:underline font-medium">
-                Edit
-              </button>
-            </div>
-            <div>
-              <button className="text-red-600 hover:underline font-medium">
-                Delete
-              </button>
-            </div>
-          </div>
-        </>
-      ),
-    },
-  ];
-
   return (
     <>
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
@@ -119,26 +41,9 @@ const UserList: FC<AddUserModalProps> = ({ onAddUser }) => {
                   isHeader
                   className="px-5 py-3 font-medium text-start"
                 >
-                  First Name
+                  Full Name
                 </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-start"
-                >
-                  Middle Name
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-center"
-                >
-                  Last Name
-                </TableCell>
-                <TableCell
-                  isHeader
-                  className="px-5 py-3 font-medium text-start"
-                >
-                  Suffix Name
-                </TableCell>
+
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-start"
@@ -149,7 +54,13 @@ const UserList: FC<AddUserModalProps> = ({ onAddUser }) => {
                   isHeader
                   className="px-5 py-3 font-medium text-start"
                 >
-                  Address
+                  Birth Date
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Age
                 </TableCell>
                 <TableCell
                   isHeader
@@ -160,7 +71,7 @@ const UserList: FC<AddUserModalProps> = ({ onAddUser }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user, index) => (
+              {/*{users.map((user, index) => (
                 <TableRow className="hover:bg-gray-100" key={index}>
                   <TableCell className="px-4 py-3 text-center">
                     {user.no}
@@ -188,7 +99,7 @@ const UserList: FC<AddUserModalProps> = ({ onAddUser }) => {
                     {user.action}
                   </TableCell>
                 </TableRow>
-              ))}
+              ))} */}
             </TableBody>
           </Table>
         </div>

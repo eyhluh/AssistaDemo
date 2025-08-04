@@ -8,12 +8,12 @@ const AppSidebar = () => {
     {
       icon: "",
       path: "/",
-      name: "Gender List",
+      name: "Gender",
     },
     {
       icon: "",
-      path: "#",
-      name: "User List",
+      path: "/users",
+      name: "User",
     },
   ];
 
@@ -34,8 +34,8 @@ const AppSidebar = () => {
       >
         <div className="h-full px-3 pb-4 overflow-y-auto bg-white">
           <ul className="space-y-2 font-medium">
-            {menuItems.map((menuItem) => (
-              <li>
+            {menuItems.map((menuItem, index) => (
+              <li key={index}>
                 <Link
                   to={menuItem.path}
                   className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
