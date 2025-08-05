@@ -9,9 +9,20 @@ use Illuminate\Validation\Rule;
 
 
 class UserController extends Controller
-{
-    public function storeUser(Request $request)
+{   
+     public function loadUsers()
     {
+        $users = User::with(['gender'])->where('tbl_users.is_deleted', false
+        )->get();
+        
+        return response()->json([
+            'users' => $users
+        ], 200);
+    }
+
+    public function storeUser(Request $request)
+    {   
+
         $validated = $request->validate([
             'first_name' => ['required', 'max:55'],
             'middle_name' => ['nullable', 'max:55'],
@@ -43,40 +54,8 @@ class UserController extends Controller
         ], 200);
     }
 
-    public function loadUsers()
+    public function updateUser(Request $request, User $user )
     {
-        $users = User::with(['gender'])->where('tbl_users.is_deleted', false
-        )->get();
-        
-        return response()->json([
-            'users' => $users
-        ], 200);
-    }
-
-    public function getUser($userId)
-    {
-        $user = User::with('gender')->find($userId);
-        
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
-        }
-        
-        return response()->json([
-            'user' => $user
-        ], 200);
-    }
-
-    public function updateUser(Request $request, $userId)
-    {
-        $user = User::find($userId);
-        
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
-        }
 
         $validatedData = $request->validate([
             'first_name' => ['required', 'max:55'],
@@ -85,14 +64,12 @@ class UserController extends Controller
             'suffix_name' => ['nullable', 'max:55'],
             'gender' => ['required'],
             'birth_date' => ['required', 'date'],
-            'username' => ['required', 'min:6', 'max:12', Rule::unique('tbl_users', 'username')->ignore($userId, 'user_id')],
-            'password' => ['nullable', 'min:6', 'max:12', 'confirmed'],
-            'password_confirmation' => ['nullable', 'min:6', 'max:12'],
+            'username' => ['required', 'min:6', 'max:12', Rule::unique('tbl_users', 'username')->ignore($user)],
         ]);
 
         $age = date_diff(date_create($validatedData['birth_date']), date_create('now'))->y;
 
-        $updateData = [
+        $user ->update ([
             'first_name' => $validatedData['first_name'],
             'middle_name' => $validatedData['middle_name'],
             'last_name' => $validatedData['last_name'],
@@ -101,30 +78,19 @@ class UserController extends Controller
             'birth_date' => $validatedData['birth_date'],
             'age' => $age,
             'username' => $validatedData['username'],
-        ];
-
-        if (isset($validatedData['password'])) {
-            $updateData['password'] = bcrypt($validatedData['password']);
-        }
-
-        $user->update($updateData);
+        ]);
 
         return response()->json([
             'message' => 'User updated successfully',
+            'user' => $user
         ], 200);
     }
 
-    public function destroyUser($userId)
+    public function destroyUser(User $user)
     {
-        $user = User::find($userId);
         
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
-        }
-
-        $user->update(['is_deleted' => 1]);
+        $user->update([
+            'is_deleted' => true]);
 
         return response()->json([
             'message' => 'User deleted successfully',

@@ -15,10 +15,9 @@ Route::controller(GenderController::class)->prefix('/gender')->group(function ()
 
 Route::controller(UserController::class)->prefix('/user')->group(function () {
     Route::get('/loadUsers', 'loadUsers');
-    Route::get('/getUser/{userId}', 'getUser');
     Route::post('/storeUser', 'storeUser');
-    Route::put('/updateUser/{User}', 'updateUser');
-    Route::put('/destroyUser/{User}', 'destroyUser');
+    Route::put('/updateUser/{user}', 'updateUser');
+    Route::put('/destroyUser/{user}', 'destroyUser');
 });
 
 // Test route to check if API is working
