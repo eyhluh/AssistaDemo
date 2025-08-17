@@ -2,7 +2,7 @@ import type { ChangeEvent, FC } from "react";
 
 interface FloatingLabelInputProps {
   label: string;
-  type: "text" | "date" | "password";
+  type: "text" | "date" | "password" | "email";
   inputClassName?: string;
   newInputClassName?: string;
   labelClassName?: string;

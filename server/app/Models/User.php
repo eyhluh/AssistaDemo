@@ -4,9 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -24,15 +24,16 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'first_name',
+        'profile_picture',
         'middle_name',
         'last_name',
         'suffix_name',
         'gender_id',
         'birth_date',
         'age',
-        'username',
+        'gmail',
         'password',
-        'is_deleted',
+        'is_deleted'
     ];
 
     /**
@@ -56,7 +57,18 @@ class User extends Authenticatable
         ];
     }
 
-    public function gender(): BelongsTo{
+    public function gender(): BelongsTo
+    {
         return $this->belongsTo(Gender::class, 'gender_id', 'gender_id');
+    }
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'gmail';
     }
 }

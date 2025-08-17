@@ -1,17 +1,27 @@
 import { Link } from "react-router-dom";
 import { useSidebar } from "../contexts/SidebarContext";
+import { 
+  BsSpeedometer2, 
+  BsGenderAmbiguous, 
+  BsPeople 
+} from "react-icons/bs";
 
 const AppSidebar = () => {
   const { isOpen, toggleSidebar } = useSidebar();
 
   const menuItems = [
     {
-      icon: "",
-      path: "/",
+      icon: <BsSpeedometer2 className="w-5 h-5" />,
+      path: "/dashboard",
+      name: "Dashboard",
+    },
+    {
+      icon: <BsGenderAmbiguous className="w-5 h-5" />,
+      path: "/genders",
       name: "Gender",
     },
     {
-      icon: "",
+      icon: <BsPeople className="w-5 h-5" />,
       path: "/users",
       name: "User",
     },
@@ -40,7 +50,11 @@ const AppSidebar = () => {
                   to={menuItem.path}
                   className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
                 >
-                  {menuItem.icon && menuItem.icon}
+                  {menuItem.icon && (
+                    <span className="text-gray-500 group-hover:text-gray-900">
+                      {menuItem.icon}
+                    </span>
+                  )}
                   <span className="ms-3">{menuItem.name}</span>
                 </Link>
               </li>

@@ -13,7 +13,7 @@ const GenderMainPage = () => {
     isVisible: toustMessageIsVisible,
     showToastMessage,
     closeToastMessage,
-  } = useToastMessage("", false);
+  } = useToastMessage("", false, false);
 
   const { refresh, handleRefresh } = useRefresh(false);
 

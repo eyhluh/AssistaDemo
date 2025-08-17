@@ -9,6 +9,7 @@ import {
 } from "../../../components/Table";
 import GenderService from "../../../services/GenderService";
 import Spinner from "../../../components/Spinner/Spinner";
+import { BsPencilSquare, BsTrash } from "react-icons/bs";
 import type { GenderColumns } from "../../../interfaces/GenderInterface";
 
 interface GenderListProps {
@@ -88,18 +89,20 @@ const GenderList: FC<GenderListProps> = ({ refreshKey }) => {
                       {gender.gender}
                     </TableCell>
                     <TableCell className="px-5 py-3 text-center">
-                      <div className="flex justify-center items-center gap-4">
+                      <div className="flex justify-center items-center gap-3">
                         <Link
                           to={`/gender/edit/${gender.gender_id}`}
-                          className="text-green-600 hover-underline font-medium"
+                          className="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                          title="Edit Gender"
                         >
-                          Edit
+                          <BsPencilSquare className="w-5 h-5" />
                         </Link>
                         <Link
                           to={`/gender/delete/${gender.gender_id}`}
-                          className="text-red-600 hover-underline font-medium"
+                          className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          title="Delete Gender"
                         >
-                          Delete
+                          <BsTrash className="w-5 h-5" />
                         </Link>
                       </div>
                     </TableCell>

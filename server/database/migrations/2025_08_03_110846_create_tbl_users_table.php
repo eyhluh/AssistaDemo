@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('tbl_users', function (Blueprint $table) {
             $table->id('user_id');
+            $table->string('profile_picture', 255)->nullable();
             $table->string('first_name', 55);
             $table->string('middle_name', 55)->nullable();
             $table->string('last_name', 55);
@@ -20,7 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('gender_id');
             $table->date('birth_date');
             $table->integer('age');
-            $table->string('username', 55);
+            $table->string('gmail', 55);
             $table->string('password', 255);
             $table->tinyInteger('is_deleted')->default(false);
             $table->timestamps();

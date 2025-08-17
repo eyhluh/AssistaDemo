@@ -27,7 +27,7 @@ const DeleteUserFormModal: FC<DeleteUserFormModalProps> = ({
   const [suffixName, setSuffixName] = useState("");
   const [gender, setGender] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [username, setUsername] = useState("");
+  const [gmail, setGmail] = useState("");
 
   const handleDestroyUser = async (e: FormEvent) => {
     try {
@@ -66,7 +66,7 @@ const DeleteUserFormModal: FC<DeleteUserFormModalProps> = ({
         setSuffixName(user.suffix_name ?? "");
         setGender(user.gender.gender);
         setBirthDate(user.birth_date);
-        setUsername(user.username);
+        setGmail(user.gmail);
       } else {
         console.error(
           "Unexpected user error occured  during getting user details: ",
@@ -144,12 +144,12 @@ const DeleteUserFormModal: FC<DeleteUserFormModalProps> = ({
               </div>
               <div className="mb-4">
                 <label
-                  htmlFor="username"
+                  htmlFor="gmail"
                   className="font-medium text-black mb-2"
                 >
-                  Username
+                  Gmail
                 </label>
-                <p className="text-gray-500 font-medium">{username}</p>
+                <p className="text-gray-500 font-medium">{gmail}</p>
               </div>
             </div>
           </div>

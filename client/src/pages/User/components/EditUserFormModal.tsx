@@ -6,11 +6,13 @@ import Modal from "../../../components/Modal";
 import FloatingLabelSelect from "../../../components/Select/FloatingLabelSelect";
 import GenderService from "../../../services/GenderService";
 import UserService from "../../../services/UserService";
+import { useAuth } from "../../../contexts/AuthContext";
 import type {
   UserColumns,
   UserFieldErrors,
 } from "../../../interfaces/UserInterface";
 import type { GenderColumns } from "../../../interfaces/GenderInterface";
+import UploadInput from "../../../components/Input/UploadInput";
 
 interface EditUserFormModalProps {
   user: UserColumns | null;
@@ -27,17 +29,23 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
   onUserUpdated,
   refreshKey,
 }) => {
+  const { updateUser } = useAuth();
   const [loadingGenders, setLoadingGenders] = useState(false);
   const [genders, setGenders] = useState<GenderColumns[]>([]);
 
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [existingProfilePicture, setExistingProfilePicture] = useState<
+    string | null
+  >(null);
+  const [editUserProfilePicture, setEditUserProfilePicture] =
+    useState<File | null>(null);
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [suffixName, setSuffixName] = useState("");
   const [gender, setGender] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [username, setUsername] = useState("");
+  const [gmail, setGmail] = useState("");
   const [errors, setErrors] = useState<UserFieldErrors>({});
 
   const handleUpdateUser = async (e: React.FormEvent) => {
@@ -46,27 +54,45 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
 
       setLoadingUpdate(true);
 
-      const payload = {
-        first_name: firstName,
-        middle_name: middleName,
-        last_name: lastName,
-        suffix_name: suffixName,
-        gender: gender,
-        birth_date: birthDate,
-        username: username,
-      };
+      const formData = new FormData();
+      formData.append("_method", "PUT");
 
-      const res = await UserService.updateUser(user?.user_id!, payload);
+      if (editUserProfilePicture) {
+        formData.append("edit_user_profile_picture", editUserProfilePicture);
+      } else if (!existingProfilePicture) {
+        formData.append("remove_profile_picture", "1");
+      }
+
+      formData.append("first_name", firstName);
+      formData.append("middle_name", middleName || "");
+      formData.append("last_name", lastName);
+      formData.append("suffix_name", suffixName || "");
+      formData.append("gender", gender);
+      formData.append("birth_date", birthDate);
+      formData.append("gmail", gmail);
+
+      const res = await UserService.updateUser(user?.user_id!, formData);
 
       if (res.status === 200) {
+        setExistingProfilePicture(
+          res.data.user.profile_picture ? res.data.user.profile_picture : null
+        );
+
+        setEditUserProfilePicture(null);
         setFirstName(res.data.user.first_name);
         setMiddleName(res.data.user.middle_name ?? "");
         setLastName(res.data.user.last_name);
         setSuffixName(res.data.user.suffix_name ?? "");
         setGender(res.data.user.gender_id);
         setBirthDate(res.data.user.birth_date);
-        setUsername(res.data.user.username);
+        setGmail(res.data.user.gmail);
         setErrors({});
+
+        // Update the user state in AuthContext to reflect the changes immediately
+        updateUser({
+          user: res.data.user,
+          token: localStorage.getItem("token") || ""
+        });
 
         onUserUpdated(res.data.message);
         handleLoadGenders();
@@ -119,13 +145,18 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (user) {
+        setEditUserProfilePicture(null);
+
+        setExistingProfilePicture(
+          user.profile_picture ? user.profile_picture : null
+        );
         setFirstName(user.first_name);
         setMiddleName(user.middle_name ?? "");
         setLastName(user.last_name);
         setSuffixName(user.suffix_name ?? "");
         setGender(user.gender.gender_id.toString());
         setBirthDate(user.birth_date);
-        setUsername(user.username);
+        setGmail(user.gmail);
       } else {
         console.error(
           "Unexpected user error occured  during getting user details: ",
@@ -142,6 +173,17 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
           <h1 className="text-2xl border-b border-gray-100 p-4 font-semibold mb-4">
             Edit User Form
           </h1>
+          <div className="mb-4">
+            <UploadInput
+              label="Profile Picture"
+              name="edit_user_profile_picture"
+              value={editUserProfilePicture}
+              onChange={setEditUserProfilePicture}
+              onRemoveExistingImageUrl={() => setExistingProfilePicture(null)}
+              existingImageUrl={existingProfilePicture}
+              errors={errors.edit_user_profile_picture}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4 border-b border-gray-100 mb-4">
             <div className="col-span-2 md:col-span-1">
               <div className="mb-4">
@@ -225,13 +267,13 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
               </div>
               <div className="mb-4">
                 <FloatingLabelInput
-                  label="Username"
-                  type="text"
-                  name="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  label="Gmail"
+                  type="email"
+                  name="gmail"
+                  value={gmail}
+                  onChange={(e) => setGmail(e.target.value)}
                   required
-                  errors={errors.username}
+                  errors={errors.gmail}
                 />
               </div>
             </div>
