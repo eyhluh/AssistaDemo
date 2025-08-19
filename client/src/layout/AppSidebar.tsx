@@ -18,6 +18,16 @@ const AppSidebar = () => {
     },
     {
       icon: <BsGenderAmbiguous className="w-5 h-5" />,
+      path: "/crisiss",
+      name: "Crisis",
+    },
+    {
+      icon: <BsGenderAmbiguous className="w-5 h-5" />,
+      path: "/situations",
+      name: "Situation",
+    },
+    {
+      icon: <BsGenderAmbiguous className="w-5 h-5" />,
       path: "/applicants",
       name: "Applicant",
     },

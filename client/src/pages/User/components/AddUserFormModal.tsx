@@ -5,11 +5,9 @@ import FloatingLabelSelect from "../../../components/Select/FloatingLabelSelect"
 import SubmitButton from "../../../components/Button/SubmitButton";
 import CloseButton from "../../../components/Button/CloseButton";
 import GenderService from "../../../services/GenderService";
-import ApplicantService from "../../../services/ApplicantService";
 import UserService from "../../../services/UserService";
 import type { UserFieldErrors } from "../../../interfaces/UserInterface";
 import type { GenderColumns } from "../../../interfaces/GenderInterface";
-import type { ApplicantColumns } from "../../../interfaces/ApplicantInterface";
 import UploadInput from "../../../components/Input/UploadInput";
 
 interface AddUserFormModalProps {
@@ -27,7 +25,6 @@ const AddUserFormModal: FC<AddUserFormModalProps> = ({
 }) => {
   const [loadingGenders, setLoadingGenders] = useState(false);
   const [genders, setGenders] = useState<GenderColumns[]>([]);
-  const [applicants, setApplicants] = useState<ApplicantColumns[]>([]);
 
   const [loadingStore, setLoadingStore] = useState(false);
   const [addUserProfilePicture, setAddUserProfilePicture] =
@@ -37,7 +34,7 @@ const AddUserFormModal: FC<AddUserFormModalProps> = ({
   const [lastName, setLastName] = useState("");
   const [suffixName, setSuffixName] = useState("");
   const [gender, setGender] = useState("");
-  const [applicantId, setApplicantId] = useState("");
+  const [crisis, setcrisis] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [gmail, setGmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,7 +58,7 @@ const AddUserFormModal: FC<AddUserFormModalProps> = ({
       formData.append("last_name", lastName);
       formData.append("suffix_name", suffixName || "");
       formData.append("gender", gender);
-      formData.append("applicant", applicantId);
+      formData.append("crisis", crisis);
       formData.append("birth_date", birthDate);
       formData.append("gmail", gmail);
       formData.append("password", password);
@@ -76,6 +73,7 @@ const AddUserFormModal: FC<AddUserFormModalProps> = ({
         setLastName("");
         setSuffixName("");
         setGender("");
+        setcrisis("");
         setBirthDate("");
         setGmail("");
         setPassword("");
@@ -127,29 +125,9 @@ const AddUserFormModal: FC<AddUserFormModalProps> = ({
     }
   };
 
-  const handleLoadApplicants = async () => {
-    try {
-      const res = await ApplicantService.loadApplicants();
-      if (res.status === 200) {
-        setApplicants(res.data.applicants);
-      } else {
-        console.error(
-          "Unexpected error occurred during loading applicants: ",
-          res.status
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Unexpected server error occurred during loading applicants: ",
-        error
-      );
-    }
-  };
-
   useEffect(() => {
     if (isOpen) {
       handleLoadGenders();
-      handleLoadApplicants();
     }
   }, [isOpen]);
 
@@ -237,25 +215,7 @@ const AddUserFormModal: FC<AddUserFormModalProps> = ({
                   )}
                 </FloatingLabelSelect>
               </div>
-              <div className="mb-4">
-                <FloatingLabelSelect
-                  label="Applicant"
-                  name="applicant"
-                  value={applicantId}
-                  onChange={(e) => setApplicantId(e.target.value)}
-                  required
-                  errors={errors.applicant}
-                >
-                  <>
-                    <option value="">Select Applicant</option>
-                    {applicants.map((applicant, index) => (
-                      <option value={applicant.applicant_id} key={index}>
-                        {applicant.applicant}
-                      </option>
-                    ))}
-                  </>
-                </FloatingLabelSelect>
-              </div>
+              <div className="mb-4"></div>
             </div>
             <div className="col-span-2 md:col-span-1">
               <div className="mb-4">

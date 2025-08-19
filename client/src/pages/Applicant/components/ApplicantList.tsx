@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { useEffect, useState, type FC } from "react";
+import { useCallback, useEffect, useRef, useState, type FC } from "react";
 import {
   Table,
   TableBody,
@@ -7,50 +6,173 @@ import {
   TableHeader,
   TableRow,
 } from "../../../components/Table";
-import ApplicantService from "../../../services/ApplicantService";
-import Spinner from "../../../components/Spinner/Spinner";
+
 import { BsPencilSquare, BsTrash } from "react-icons/bs";
+
 import type { ApplicantColumns } from "../../../interfaces/ApplicantInterface";
+import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
+import Spinner from "../../../components/Spinner/Spinner";
+import ApplicantService from "../../../services/ApplicantService";
 
 interface ApplicantListProps {
+  onAddApplicant: () => void;
+  //onEditApplicant: (applicant: ApplicantColumns | null) => void;
+  //onDeleteApplicant: (applicant: ApplicantColumns | null) => void;
   refreshKey: boolean;
 }
 
-const ApplicantList: FC<ApplicantListProps> = ({ refreshKey }) => {
+const ApplicantList: FC<ApplicantListProps> = ({
+  onAddApplicant,
+  //onEditApplicant,
+  //onDeleteApplicant,
+  refreshKey,
+}) => {
   const [loadingApplicants, setLoadingApplicants] = useState(false);
   const [applicants, setApplicants] = useState<ApplicantColumns[]>([]);
+  const [applicantsTableCurrentPage, setApplicantsTableCurrentPage] =
+    useState(1);
+  const [applicantsTableLastPages, setApplicantsTableLastPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const handleLoadApplicants = async () => {
+  const [search, setSearch] = useState("");
+  const [debounceSearch, setDebounceSearch] = useState("");
+
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  const handleLoadApplicants = async (
+    page: number,
+    append = false,
+    search: string
+  ) => {
     try {
       setLoadingApplicants(true);
-      const res = await ApplicantService.loadApplicants();
+
+      const res = await ApplicantService.loadApplicants(page, search);
+
       if (res.status === 200) {
-        setApplicants(res.data.applicants);
-      } else {
-        console.error(
-          "Unexpected error occurred during loading applicants: ",
-          res.status
+        const applicantsData =
+          res.data.applicants.data || res.data.applicants || [];
+        const lastPage =
+          res.data.applicants.last_page ||
+          res.data.last_page ||
+          applicantsTableLastPages ||
+          1;
+
+        setApplicants(
+          append ? [...applicants, ...applicantsData] : applicantsData
         );
+        setApplicantsTableCurrentPage(page);
+        setApplicantsTableLastPages(lastPage);
+        setHasMore(page < lastPage);
+      } else {
+        setApplicants(append ? applicants : []);
+        setHasMore(false);
       }
     } catch (error) {
-      console.error(
-        "Unexpected server error occurred during loading applicants: ",
-        error
-      );
+      throw error;
     } finally {
       setLoadingApplicants(false);
     }
   };
+
+  const handleScroll = useCallback(() => {
+    const ref = tableRef.current;
+
+    if (
+      ref &&
+      ref.scrollTop + ref.clientHeight >= ref.scrollHeight - 10 &&
+      hasMore &&
+      !loadingApplicants
+    ) {
+      handleLoadApplicants(
+        applicantsTableCurrentPage + 1,
+        true,
+        debounceSearch
+      );
+    }
+  }, [hasMore, loadingApplicants, applicantsTableCurrentPage, debounceSearch]);
+
+  // Function to format applicant's full name
+  const handleApplicantFullNameFormat = (applicant: ApplicantColumns) => {
+    let fullName = "";
+
+    if (applicant.middle_name) {
+      fullName = `${applicant.last_name}, ${
+        applicant.first_name
+      } ${applicant.middle_name.charAt(0)}.`;
+    } else {
+      fullName = `${applicant.last_name}, ${applicant.first_name}`;
+    }
+
+    if (applicant.suffix_name) {
+      fullName += ` ${applicant.suffix_name}`;
+    }
+
+    return fullName;
+  };
+
   useEffect(() => {
-    handleLoadApplicants();
-  }, [refreshKey]);
+    const ref = tableRef.current;
+
+    if (ref) {
+      ref.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (ref) {
+        ref.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [handleScroll]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounceSearch(search);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    setApplicants([]);
+    setApplicantsTableCurrentPage(1);
+    setHasMore(true);
+
+    handleLoadApplicants(1, false, debounceSearch);
+  }, [refreshKey, debounceSearch]);
 
   return (
     <>
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <div className="max-w-full max-h-[calc(100vh-15)] overflow-x-auto">
+        <div
+          ref={tableRef}
+          className="relative max-w-full max-h-[calc(100vh-8.5rem)] overflow-x-auto"
+        >
           <Table>
-            <TableHeader className="border-b border-gray-100 bg-blue-600 text-white sticky top-0 z-30 text-xs">
+            <caption className="mb-4">
+              <div className="border-b border-gray-100">
+                <div className="p-4 flex justify-between">
+                  <div className="w-64">
+                    <FloatingLabelInput
+                      label="Search Applicants"
+                      type="text"
+                      name="search"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-lg transition-colors cursor-pointer"
+                    onClick={onAddApplicant}
+                  >
+                    Add Applicant
+                  </button>
+                </div>
+              </div>
+            </caption>
+            <TableHeader className="border-b border-gray-200 bg-blue-600 text-white sticky top-0 z-10 text-xs">
               <TableRow>
                 <TableCell
                   isHeader
@@ -60,9 +182,27 @@ const ApplicantList: FC<ApplicantListProps> = ({ refreshKey }) => {
                 </TableCell>
                 <TableCell
                   isHeader
-                  className="px-5 py-3 font-medium text-center"
+                  className="px-5 py-3 font-medium text-start"
                 >
-                  Applicant
+                  Full Name
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Gender
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Crisis
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Birth Date
                 </TableCell>
                 <TableCell
                   isHeader
@@ -72,42 +212,73 @@ const ApplicantList: FC<ApplicantListProps> = ({ refreshKey }) => {
                 </TableCell>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-gray-100 text-sm text-gray-500">
-              {loadingApplicants ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-4">
-                    <Spinner size="md" />
-                  </TableCell>
-                </TableRow>
-              ) : (
+            <TableBody className="divide-y divide-gray-100 text-gray-500 text-sm">
+              {applicants.length > 0 ? (
                 applicants.map((applicant, index) => (
-                  <TableRow className="hover:bg-gray-100" key={index}>
-                    <TableCell className="px-5 py-3 text-center">
+                  <TableRow
+                    className="hover:bg-gray-100"
+                    key={applicant.applicant_id}
+                  >
+                    <TableCell className="px-4 py-3 text-center">
                       {index + 1}
                     </TableCell>
-                    <TableCell className="px-5 py-3 text-center">
-                      {applicant.applicant}
+                    <TableCell className="px-4 py-3 text-start">
+                      {handleApplicantFullNameFormat(applicant)}
                     </TableCell>
-                    <TableCell className="px-5 py-3 text-center">
-                      <div className="flex justify-center items-center gap-3">
-                        <Link
-                          to={`/applicant/edit/${applicant.applicant_id}`}
+                    <TableCell className="px-4 py-3 text-start">
+                      {applicant.gender.gender}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-start">
+                      {applicant.crisis.crisis}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-start">
+                      {applicant.birth_date}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-center">
+                      <div className="flex gap-3 justify-center">
+                        <button
+                          type="button"
                           className="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                          //onClick={() => onEditApplicant(applicant)}
                           title="Edit Applicant"
                         >
                           <BsPencilSquare className="w-5 h-5" />
-                        </Link>
-                        <Link
-                          to={`/applicant/delete/${applicant.applicant_id}`}
+                        </button>
+                        <button
+                          type="button"
                           className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          //onClick={() => onDeleteApplicant(applicant)}
                           title="Delete Applicant"
                         >
                           <BsTrash className="w-5 h-5" />
-                        </Link>
+                        </button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))
+              ) : !loadingApplicants && applicants.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="px-4 py-3 text-center font-medium"
+                  >
+                    No Records Found
+                  </TableCell>
+                </TableRow>
+              ) : null}
+              {loadingApplicants && applicants.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="px-4 py-3 text-center">
+                    <Spinner size="md" />
+                  </TableCell>
+                </TableRow>
+              )}
+              {loadingApplicants && applicants.length > 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="px-4 py-3 text-center">
+                    <Spinner size="md" />
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

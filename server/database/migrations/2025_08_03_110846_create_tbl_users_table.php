@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('last_name', 55);
             $table->string('suffix_name')->nullable();
             $table->unsignedBigInteger('gender_id');
-            $table->unsignedBigInteger('applicant_id');
             $table->date('birth_date');
             $table->integer('age');
             $table->string('gmail', 55);
@@ -33,11 +32,6 @@ return new class extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
-            $table->foreign('applicant_id')
-                ->references('applicant_id')
-                ->on('tbl_applicants')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
 
     }

@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GenderController;
-use App\Http\Controllers\Api\ApplicantController;
+use App\Http\Controllers\Api\CrisisController;
+use App\Http\Controllers\Api\SituationController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ApplicantController;
 use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +21,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', 'logout');
     });
 
+    Route::controller(SituationController::class)->prefix('/situation')->group(function () {
+        Route::get('/loadSituations', 'loadSituations');
+        Route::get('/getSituation/{situationId}', 'getSituation');
+        Route::post('/storeSituation', 'storeSituation');
+        Route::put('/updateSituation/{situation}', 'updateSituation');
+        Route::put('/destroySituation/{situation}', 'destroySituation');
+    });
+
     Route::controller(GenderController::class)->prefix('/gender')->group(function () {
         Route::get('/loadGenders', 'loadGenders');
         Route::get('/getGender/{genderId}', 'getGender');
@@ -27,11 +37,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/destroyGender/{gender}', 'destroyGender');
     });
 
+    Route::controller(CrisisController::class)->prefix('/crisis')->group(function () {
+        Route::get('/loadCrisiss', 'loadCrisiss');
+        Route::get('/getCrisis/{crisisId}', 'getCrisis');
+        Route::post('/storeCrisis', 'storeCrisis');
+        Route::put('/updateCrisis/{crisis}', 'updateCrisis');
+        Route::put('/destroyCrisis/{crisis}', 'destroyCrisis');
+    });
+
     Route::controller(ApplicantController::class)->prefix('/applicant')->group(function () {
         Route::get('/loadApplicants', 'loadApplicants');
+        // Route for getting a single applicant (if needed, replace {applicantId} with actual ID parameter)
         Route::get('/getApplicant/{applicantId}', 'getApplicant');
         Route::post('/storeApplicant', 'storeApplicant');
-        Route::put('/updateApplicant/{applicant}', 'updateApplicant');
+        Route::post('/updateApplicant/{applicant}', 'updateApplicant'); // Using POST for file uploads with PUT method spoofing
         Route::put('/destroyApplicant/{applicant}', 'destroyApplicant');
     });
 

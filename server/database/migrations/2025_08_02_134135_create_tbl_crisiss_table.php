@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tbl_applicants', function (Blueprint $table) {
-            $table->id('applicant_id');
-            $table->string('applicant');
+        Schema::create('tbl_crisiss', function (Blueprint $table) {
+            $table->id('crisis_id');
+            $table->string('crisis');
             $table->tinyInteger('is_deleted')->default(false);
             $table->timestamps();
         });
@@ -25,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('tbl_applicants');
+        Schema::dropIfExists('tbl_crisiss');
         Schema::enableForeignKeyConstraints();
     }
 };

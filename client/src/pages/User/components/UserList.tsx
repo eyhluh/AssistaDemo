@@ -190,7 +190,7 @@ const UserList: FC<UserListProps> = ({
                   isHeader
                   className="px-5 py-3 font-medium text-start"
                 >
-                  Applicant
+                  crisis
                 </TableCell>
                 <TableCell
                   isHeader
@@ -243,7 +243,7 @@ const UserList: FC<UserListProps> = ({
                       {user.gender.gender}
                     </TableCell>
                     <TableCell className="px-4 py-3  text-start">
-                      {user.applicant.applicant}
+                      {user.crisis.crisis}
                     </TableCell>
                     <TableCell className="px-4 py-3  text-start">
                       {user.birth_date}
@@ -276,7 +276,7 @@ const UserList: FC<UserListProps> = ({
               ) : !loadingUsers && users.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="px-4 py-3 text-center font-medium"
                   >
                     No Records Found

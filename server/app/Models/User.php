@@ -29,7 +29,6 @@ class User extends Authenticatable
         'last_name',
         'suffix_name',
         'gender_id',
-        'applicant_id',
         'birth_date',
         'age',
         'gmail',
@@ -63,10 +62,6 @@ class User extends Authenticatable
         return $this->belongsTo(Gender::class, 'gender_id', 'gender_id');
     }
 
-    public function applicant(): BelongsTo
-    {
-        return $this->belongsTo(Applicant::class, 'applicant_id', 'applicant_id');
-    }
 
     /**
      * Get the name of the unique identifier for the user.

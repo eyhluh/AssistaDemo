@@ -26,7 +26,7 @@ const DeleteUserFormModal: FC<DeleteUserFormModalProps> = ({
   const [lastName, setLastName] = useState("");
   const [suffixName, setSuffixName] = useState("");
   const [gender, setGender] = useState("");
-  const [applicant, setApplicant] = useState("");
+  const [crisis, setcrisis] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [gmail, setGmail] = useState("");
 
@@ -66,7 +66,7 @@ const DeleteUserFormModal: FC<DeleteUserFormModalProps> = ({
         setLastName(user.last_name);
         setSuffixName(user.suffix_name ?? "");
         setGender(user.gender.gender);
-        setApplicant(user.applicant.applicant);
+        setcrisis(user.crisis.crisis);
         setBirthDate(user.birth_date);
         setGmail(user.gmail);
       } else {
@@ -136,10 +136,10 @@ const DeleteUserFormModal: FC<DeleteUserFormModalProps> = ({
             </div>
             <div className="col-span-2 md:col-span-1">
               <div className="mb-4">
-                <label htmlFor="applicant" className="font-medium text-black mb-2">
-                  Applicant
+                <label htmlFor="crisis" className="font-medium text-black mb-2">
+                  crisis
                 </label>
-                <p className="text-gray-500 font-medium">{applicant}</p>
+                <p className="text-gray-500 font-medium">{crisis}</p>
               </div>
             </div>
             <div className="col-span-2 md:col-span-1">
@@ -153,10 +153,7 @@ const DeleteUserFormModal: FC<DeleteUserFormModalProps> = ({
                 <p className="text-gray-500 font-medium">{birthDate}</p>
               </div>
               <div className="mb-4">
-                <label
-                  htmlFor="gmail"
-                  className="font-medium text-black mb-2"
-                >
+                <label htmlFor="gmail" className="font-medium text-black mb-2">
                   Gmail
                 </label>
                 <p className="text-gray-500 font-medium">{gmail}</p>

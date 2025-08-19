@@ -1,13 +1,22 @@
-import { useEffect } from "react";
-import AddApplicantForm from "./components/AddApplicantForm";
-import ApplicantList from "./components/ApplicantList";
 import ToastMessage from "../../components/ToastMessage/ToastMessage";
+import { useModal } from "../../hooks/useModal";
+import AddApplicantFormModal from "./components/AddApplicantFormModal";
+import ApplicantList from "./components/ApplicantList";
 import { useToastMessage } from "../../hooks/useToastMessage";
 import { useRefresh } from "../../hooks/useRefresf";
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 const ApplicantMainPage = () => {
-  const location = useLocation();
+  useEffect(() => {
+    document.title = "Applicant Main Page";
+  }, []);
+
+  const {
+    isOpen: isAddApplicantFormModalOpen,
+    openModal: openAddApplicantFormModal,
+    closeModal: closeAddApplicantFormModal,
+  } = useModal(false);
+
   const {
     message: toastMessage,
     isVisible: toastMessageIsVisible,
@@ -17,17 +26,6 @@ const ApplicantMainPage = () => {
 
   const { refresh, handleRefresh } = useRefresh(false);
 
-  useEffect(() => {
-    document.title = "Applicant Main Page";
-  }, []);
-
-  useEffect(() => {
-    if (location.state?.message) {
-      showToastMessage(location.state.message);
-      handleRefresh();
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state, showToastMessage]);
   return (
     <>
       <ToastMessage
@@ -35,17 +33,16 @@ const ApplicantMainPage = () => {
         isVisible={toastMessageIsVisible}
         onClose={closeToastMessage}
       />
-      <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2 md:col-span-1">
-          <AddApplicantForm
-            onApplicantAdded={showToastMessage}
-            refreshKey={handleRefresh}
-          />
-        </div>
-        <div className="col-span-2 md:col-span-1">
-          <ApplicantList refreshKey={refresh} />
-        </div>
-      </div>
+      <AddApplicantFormModal
+        isOpen={isAddApplicantFormModalOpen}
+        onClose={closeAddApplicantFormModal}
+        onApplicantAdded={showToastMessage}
+        refreshKey={handleRefresh}
+      />
+      <ApplicantList
+        onAddApplicant={openAddApplicantFormModal}
+        refreshKey={refresh}
+      />
     </>
   );
 };

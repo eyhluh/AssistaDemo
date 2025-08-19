@@ -5,7 +5,7 @@ import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
 import Modal from "../../../components/Modal";
 import FloatingLabelSelect from "../../../components/Select/FloatingLabelSelect";
 import GenderService from "../../../services/GenderService";
-import ApplicantService from "../../../services/ApplicantService";
+import crisisService from "../../../services/crisisService";
 import UserService from "../../../services/UserService";
 import { useAuth } from "../../../contexts/AuthContext";
 import type {
@@ -13,7 +13,7 @@ import type {
   UserFieldErrors,
 } from "../../../interfaces/UserInterface";
 import type { GenderColumns } from "../../../interfaces/GenderInterface";
-import type { ApplicantColumns } from "../../../interfaces/ApplicantInterface";
+import type { crisisColumns } from "../../../interfaces/crisisInterface";
 import UploadInput from "../../../components/Input/UploadInput";
 
 interface EditUserFormModalProps {
@@ -34,7 +34,7 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
   const { updateUser } = useAuth();
   const [loadingGenders, setLoadingGenders] = useState(false);
   const [genders, setGenders] = useState<GenderColumns[]>([]);
-  const [applicants, setApplicants] = useState<ApplicantColumns[]>([]);
+  const [crisiss, setcrisiss] = useState<crisisColumns[]>([]);
 
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [existingProfilePicture, setExistingProfilePicture] = useState<
@@ -47,7 +47,7 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
   const [lastName, setLastName] = useState("");
   const [suffixName, setSuffixName] = useState("");
   const [gender, setGender] = useState("");
-  const [applicant, setApplicant] = useState("");
+  const [crisis, setcrisis] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [gmail, setGmail] = useState("");
   const [errors, setErrors] = useState<UserFieldErrors>({});
@@ -72,7 +72,7 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
       formData.append("last_name", lastName);
       formData.append("suffix_name", suffixName || "");
       formData.append("gender", gender);
-      formData.append("applicant", applicant);
+      formData.append("crisis", crisis);
       formData.append("birth_date", birthDate);
       formData.append("gmail", gmail);
 
@@ -96,7 +96,7 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
         // Update the user state in AuthContext to reflect the changes immediately
         updateUser({
           user: res.data.user,
-          token: localStorage.getItem("token") || ""
+          token: localStorage.getItem("token") || "",
         });
 
         onUserUpdated(res.data.message);
@@ -140,20 +140,20 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
       setLoadingGenders(false);
     }
   };
-  const handleLoadApplicants = async () => {
+  const handleLoadcrisiss = async () => {
     try {
-      const res = await ApplicantService.loadApplicants();
+      const res = await crisisService.loadcrisiss();
       if (res.status === 200) {
-        setApplicants(res.data.applicants);
+        setcrisiss(res.data.crisiss);
       } else {
         console.error(
-          "Unexpected error occurred during loading applicants: ",
+          "Unexpected error occurred during loading crisiss: ",
           res.status
         );
       }
     } catch (error) {
       console.error(
-        "Unexpected server error occurred during loading applicants: ",
+        "Unexpected server error occurred during loading crisiss: ",
         error
       );
     }
@@ -162,7 +162,7 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       handleLoadGenders();
-      handleLoadApplicants();
+      handleLoadcrisiss();
     }
   }, [isOpen]);
 
@@ -179,7 +179,7 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
         setLastName(user.last_name);
         setSuffixName(user.suffix_name ?? "");
         setGender(user.gender.gender_id.toString());
-        setApplicant(user.applicant.applicant_id.toString());
+        setcrisis(user.crisis.crisis_id.toString());
         setBirthDate(user.birth_date);
         setGmail(user.gmail);
       } else {
@@ -279,18 +279,18 @@ const EditUserFormModal: FC<EditUserFormModalProps> = ({
               </div>
               <div className="mb-4">
                 <FloatingLabelSelect
-                  label="Applicant"
-                  name="applicant"
-                  value={applicant}
-                  onChange={(e) => setApplicant(e.target.value)}
+                  label="crisis"
+                  name="crisis"
+                  value={crisis}
+                  onChange={(e) => setcrisis(e.target.value)}
                   required
-                  errors={errors.applicant}
+                  errors={errors.crisis}
                 >
                   <>
-                    <option value="">Select Applicant</option>
-                    {applicants.map((applicant, index) => (
-                      <option value={applicant.applicant_id} key={index}>
-                        {applicant.applicant}
+                    <option value="">Select crisis</option>
+                    {crisiss.map((crisis, index) => (
+                      <option value={crisis.crisis_id} key={index}>
+                        {crisis.crisis}
                       </option>
                     ))}
                   </>

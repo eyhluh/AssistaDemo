@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import EditApplicantForm from "./components/EditApplicantForm";
+import EditCrisisForm from "./components/EditCrisisForm";
 import ToastMessage from "../../components/ToastMessage/ToastMessage";
 import { useToastMessage } from "../../hooks/useToastMessage";
 
-const EditApplicantPage = () => {
+const EditCrisisPage = () => {
   useEffect(() => {
-    document.title = "Applicant Edit Page";
+    document.title = "Crisis Edit Page";
   }, []);
 
   const {
@@ -22,9 +22,9 @@ const EditApplicantPage = () => {
         isVisible={toastMessageIsVisible}
         onClose={closeToastMessage}
       />
-      <EditApplicantForm onApplicantUpdated={showToastMessage} />
+      <EditCrisisForm onCrisisUpdated={showToastMessage} />
     </>
   );
 };
 
-export default EditApplicantPage;
+export default EditCrisisPage;

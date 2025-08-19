@@ -1,38 +1,38 @@
 import { useState, type FC, type FormEvent } from "react";
 import SubmitButton from "../../../components/Button/SubmitButton";
 import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
-import ApplicantService from "../../../services/ApplicantService";
-import type { ApplicantFieldErrors } from "../../../interfaces/ApplicantInterface";
+import CrisisService from "../../../services/CrisisService";
+import type { CrisisFieldErrors } from "../../../interfaces/CrisisInterface";
 
-interface AddApplicantFormProps {
-  onApplicantAdded: (message: string) => void;
+interface AddCrisisFormProps {
+  onCrisisAdded: (message: string) => void;
   refreshKey: () => void;
 }
 
-const AddApplicantForm: FC<AddApplicantFormProps> = ({
-  onApplicantAdded,
+const AddcrisisForm: FC<AddCrisisFormProps> = ({
+  onCrisisAdded,
   refreshKey,
 }) => {
   const [loadingStore, setLoadingStore] = useState(false);
-  const [applicant, setApplicant] = useState("");
-  const [errors, setErrors] = useState<ApplicantFieldErrors>({});
+  const [crisis, setCrisis] = useState("");
+  const [errors, setErrors] = useState<CrisisFieldErrors>({});
 
-  const handleStoreApplicant = async (e: FormEvent) => {
+  const handleStorecrisis = async (e: FormEvent) => {
     try {
       e.preventDefault();
 
       setLoadingStore(true);
 
-      const res = await ApplicantService.storeApplicant({ applicant });
+      const res = await CrisisService.storeCrisis({ crisis });
 
       if (res.status === 200) {
-        setApplicant("");
+        setCrisis("");
         setErrors({});
-        onApplicantAdded(res.data.message);
+        onCrisisAdded(res.data.message);
         refreshKey();
       } else {
         console.error(
-          "Unexpected error occurred during store applicant: ",
+          "Unexpected error occurred during store crisis: ",
           res.data
         );
       }
@@ -41,7 +41,7 @@ const AddApplicantForm: FC<AddApplicantFormProps> = ({
         setErrors(error.response.data.errors);
       } else {
         console.error(
-          "Unexpected server error occurred during store applicant: ",
+          "Unexpected server error occurred during store crisis: ",
           error
         );
       }
@@ -52,24 +52,24 @@ const AddApplicantForm: FC<AddApplicantFormProps> = ({
 
   return (
     <>
-      <form onSubmit={handleStoreApplicant}>
+      <form onSubmit={handleStorecrisis}>
         <div className="mb-4">
           <FloatingLabelInput
-            label="applicant"
+            label="crisis"
             type="text"
-            name="applicant"
-            value={applicant}
-            onChange={(e) => setApplicant(e.target.value)}
+            name="crisis"
+            value={crisis}
+            onChange={(e) => setCrisis(e.target.value)}
             required
             autoFocus
-            errors={errors.applicant}
+            errors={errors.crisis}
           />
         </div>
         <div className="flex justify-end">
           <SubmitButton
-            label="Save Applicant"
+            label="Save crisis"
             loading={loadingStore}
-            loadingLabel="Saving Applicant..."
+            loadingLabel="Saving crisis..."
           />
         </div>
       </form>
@@ -77,4 +77,4 @@ const AddApplicantForm: FC<AddApplicantFormProps> = ({
   );
 };
 
-export default AddApplicantForm;
+export default AddcrisisForm;

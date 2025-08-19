@@ -3,7 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Gender;
-use App\Models\Applicant;
+use App\Models\Crisis;
+use App\Models\Situation;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +22,16 @@ class DatabaseSeeder extends Seeder
         //    'name' => 'Test User',
         //    'email' => 'test@example.com',
         //]);
+        Situation::factory()->createMany([
+            ['situation' => 'Needs Anti-Rabies Treatment'],
+            ['situation' => 'Needs Burial Assistance'],
+            ['situation' => 'Needs Laboratory/Medical Assessment'],
+            ['situation' => 'Needs Specific Medication'],
+            ['situation' => 'Needs Financial Assistance'],
+            ['situation' => 'Currently Hospitalized'],
+            ['situation' => 'Safe, but requires follow-up'],
+            ['situation' => 'Other'],
+        ]);
 
         Gender::factory()->createMany([
             ['gender' => 'Male'],
@@ -28,12 +39,12 @@ class DatabaseSeeder extends Seeder
             ['gender' => 'Prefer not to say'],
         ]);
 
-        Applicant::factory()->createMany([
-            ['applicant' => 'Labatory Exam'],
-            ['applicant' => 'Rabies'],
-            ['applicant' => 'Burial/Funeral'],
-            ['applicant' => 'Medecine Finacial'],
-            ['applicant' => 'Hospitalized'],
+        Crisis::factory()->createMany([
+            ['crisis' => 'Labatory Exam'],
+            ['crisis' => 'Rabies'],
+            ['crisis' => 'Burial/Funeral'],
+            ['crisis' => 'Medecine Finacial'],
+            ['crisis' => 'Hospitalized'],
         ]);
             
         $birthDate = fake()->date();
@@ -45,7 +56,6 @@ class DatabaseSeeder extends Seeder
             "last_name" => "Mentino",
             "suffix_name" => null,
             "gender_id" => Gender::inRandomOrder()->first()->gender_id,
-            "applicant_id" => Applicant::inRandomOrder()->first()->applicant_id,
             "birth_date" => $birthDate,
             "age" => $age,
             "gmail" => "Assista@gmail.com",

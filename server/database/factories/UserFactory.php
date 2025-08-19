@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Gender;
-use App\Models\Applicant;
+use App\Models\Crisis;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -35,7 +35,6 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'suffix_name' => fake()->suffix(),
             'gender_id' => Gender::inRandomOrder()->first()->gender_id,
-            "applicant_id" => Applicant::inRandomOrder()->first()->applicant_id,
             'birth_date' => $birthDate,
             'age' => $age,
             'gmail' => strtolower(fake()->firstName() . fake()->lastName()),
