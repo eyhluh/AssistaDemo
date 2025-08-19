@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GenderController;
+use App\Http\Controllers\Api\ApplicantController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
@@ -24,6 +25,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/storeGender', 'storeGender');
         Route::put('/updateGender/{gender}', 'updateGender');
         Route::put('/destroyGender/{gender}', 'destroyGender');
+    });
+
+    Route::controller(ApplicantController::class)->prefix('/applicant')->group(function () {
+        Route::get('/loadApplicants', 'loadApplicants');
+        Route::get('/getApplicant/{applicantId}', 'getApplicant');
+        Route::post('/storeApplicant', 'storeApplicant');
+        Route::put('/updateApplicant/{applicant}', 'updateApplicant');
+        Route::put('/destroyApplicant/{applicant}', 'destroyApplicant');
     });
 
     Route::controller(UserController::class)->prefix('/user')->group(function () {

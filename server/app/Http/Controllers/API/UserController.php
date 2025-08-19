@@ -15,8 +15,9 @@ class UserController extends Controller
 
         $search = $request->input('search');
 
-        $users = User::with(['gender'])
+        $users = User::with(['gender','applicant'])
             ->leftJoin('tbl_genders', 'tbl_users.gender_id', '=', 'tbl_genders.gender_id')
+            ->leftJoin('tbl_applicants', 'tbl_users.applicant_id', '=', 'tbl_applicants.applicant_id')
             ->where('tbl_users.is_deleted', false)
             ->orderBy('tbl_users.last_name', 'asc')
             ->orderBy('tbl_users.first_name', 'asc')
@@ -29,7 +30,8 @@ class UserController extends Controller
                     ->orWhere('tbl_users.middle_name', 'like', "%{$search}%")
                     ->orWhere('tbl_users.last_name', 'like', "%{$search}%")
                     ->orWhere('tbl_users.suffix_name', 'like', "%{$search}%")
-                    ->orWhere('tbl_genders.gender', 'like', "%{$search}%");
+                    ->orWhere('tbl_genders.gender', 'like', "%{$search}%")
+                    ->orWhere('tbl_applicants.applicant', 'like', "%{$search}%");
             });
         }
 
@@ -57,6 +59,7 @@ class UserController extends Controller
             'last_name' => ['required', 'max:55'],
             'suffix_name' => ['nullable', 'max:55'],
             'gender' => ['required'],
+            'applicant' => ['required'],
             'birth_date' => ['required', 'date'],
             'gmail' => ['required', 'min:6', 'max:20', Rule::unique('tbl_users', 'gmail')],
             'password' => ['required', 'min:6', 'max:12', 'confirmed'],
@@ -81,6 +84,7 @@ class UserController extends Controller
             'last_name' => $validated['last_name'],
             'suffix_name' => $validated['suffix_name'],
             'gender_id' => $validated['gender'],
+            'applicant_id' => $validated['applicant'],
             'birth_date' => $validated['birth_date'],
             'age' => $age,
             'gmail' => $validated['gmail'],
@@ -100,6 +104,7 @@ class UserController extends Controller
             'last_name' => ['required', 'max:55'],
             'suffix_name' => ['nullable', 'max:55'],
             'gender' => ['required'],
+            'applicant' => ['required'],
             'birth_date' => ['required', 'date'],
             'gmail' => ['required', 'min:6', 'max:20', Rule::unique('tbl_users', 'gmail')->ignore($user)],
         ]);
@@ -131,6 +136,7 @@ class UserController extends Controller
             'last_name' => $validated['last_name'],
             'suffix_name' => $validated['suffix_name'],
             'gender_id' => $validated['gender'],
+            'applicant_id' => $validated['applicant'],
             'birth_date' => $validated['birth_date'],
             'age' => $age,
             'gmail' => $validated['gmail'],

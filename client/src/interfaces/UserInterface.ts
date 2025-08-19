@@ -1,4 +1,5 @@
 import type { GenderColumns } from "./GenderInterface";
+import type { ApplicantColumns } from "./ApplicantInterface";
 
 export interface UserColumns {
     user_id: number;
@@ -8,6 +9,7 @@ export interface UserColumns {
     last_name: string;
     suffix_name?: string;
     gender: GenderColumns;
+    applicant: ApplicantColumns;
     birth_date: string;
     age: number | string;
     gmail: string;
@@ -25,6 +27,7 @@ export interface UserFieldErrors {
     last_name?: string[];
     suffix_name?: string[];
     gender?: string[];
+    applicant?: string[];
     birth_date?: string[];
     gmail?: string[];
     password?: string[];

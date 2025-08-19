@@ -106,12 +106,12 @@ const EditGenderForm: FC<EditGenderFormProps> = ({ onGenderUpdated }) => {
             />
           </div>
           <div className="flex justify-end gap-2">
-            {!loadingUpdate && <BackButton label="Back" path="/genders" />}
+            <BackButton label="Back" path="/genders" />
 
             <SubmitButton
               label="Edit Gender"
               loading={loadingUpdate}
-              loadingLabel="Upadting Gender..."
+              loadingLabel="Updating Gender..."
             />
           </div>
         </form>
