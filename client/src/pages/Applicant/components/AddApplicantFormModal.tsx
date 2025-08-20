@@ -7,7 +7,7 @@ import CloseButton from "../../../components/Button/CloseButton";
 import GenderService from "../../../services/GenderService";
 import CrisisService from "../../../services/CrisisService";
 import SituationService from "../../../services/SituationService";
-import ApplicantService from "../../../services/ApplicantService";
+import ApplicationService from "../../../services/ApplicationService";
 import type { ApplicantFieldErrors } from "../../../interfaces/ApplicantInterface";
 import type { GenderColumns } from "../../../interfaces/GenderInterface";
 import type { CrisisColumns } from "../../../interfaces/CrisisInterface";
@@ -157,7 +157,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
         formData.append("add_applicant_file", attachedFile);
       }
 
-      const res = await ApplicantService.storeApplicant(formData);
+      const res = await ApplicationService.storeApplication(formData);
 
       if (res.status === 200 || res.status === 201) {
         // Reset form
@@ -270,7 +270,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
       <Modal isOpen={isOpen} onClose={onClose} showCloseButton>
         <form onSubmit={handleStoreApplicant}>
           <h1 className="text-2xl border-b border-gray-100 p-4 font-semibold mb-4">
-            File a Grievance Application
+            File a Application
           </h1>
 
           {/* Directions Section */}
@@ -282,15 +282,6 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               <p>
                 <strong>STEP 1:</strong> Fill out the information requested
                 below. All fields marked with red asterisk (*) are required.
-              </p>
-              <p>
-                <strong>STEP 2:</strong> After submitting the form below, check
-                your email address for the One-Time PIN (OTP).
-              </p>
-              <p>
-                <strong>STEP 3:</strong> Input the One-Time PIN on the next
-                form. Submit the OTP and wait for notification indicating that
-                your grievance is successfully filed.
               </p>
             </div>
           </div>
@@ -576,7 +567,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
           </div>
 
           {/* Declaration & Consent Section */}
-          {/* <div className="mb-6">
+          <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
               Declaration & Consent
             </h3>
@@ -600,7 +591,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
                 </label>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* Submit Button */}
           <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">

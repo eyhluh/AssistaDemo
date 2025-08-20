@@ -6,11 +6,14 @@ use App\Http\Controllers\Api\CrisisController;
 use App\Http\Controllers\Api\SituationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ApplicantController;
+use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Public routes (no authentication required)
 Route::controller(AuthController::class)->prefix('/auth')->group(function () {
+    Route::post('register', 'register'); // New registration endpoint
     Route::post('login', 'login');
 });
 
@@ -45,13 +48,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/destroyCrisis/{crisis}', 'destroyCrisis');
     });
 
+    // Keep existing ApplicantController for backward compatibility
     Route::controller(ApplicantController::class)->prefix('/applicant')->group(function () {
         Route::get('/loadApplicants', 'loadApplicants');
-        // Route for getting a single applicant (if needed, replace {applicantId} with actual ID parameter)
         Route::get('/getApplicant/{applicantId}', 'getApplicant');
         Route::post('/storeApplicant', 'storeApplicant');
-        Route::post('/updateApplicant/{applicant}', 'updateApplicant'); // Using POST for file uploads with PUT method spoofing
+        Route::post('/updateApplicant/{applicant}', 'updateApplicant');
         Route::put('/destroyApplicant/{applicant}', 'destroyApplicant');
+    });
+
+    // New ApplicationController for the new applications table
+    Route::controller(ApplicationController::class)->prefix('/application')->group(function () {
+        Route::get('/loadApplications', 'loadApplications');
+        Route::get('/getApplication/{applicationId}', 'getApplication');
+        Route::post('/storeApplication', 'storeApplication');
+        Route::post('/updateApplication/{application}', 'updateApplication');
+        Route::put('/destroyApplication/{application}', 'destroyApplication');
     });
 
     Route::controller(UserController::class)->prefix('/user')->group(function () {
@@ -69,14 +81,3 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users', 'users');
     });
 });
-
-
-// Test route to check if API is working
-//Route::get('/test', function () {
-    //return response()->json(['message' => 'API is working'], 200);
-//});    
-    
-
-//Route::get('/user', function (Request $request) {
-//    // return $request->user();
-//})->middleware('auth:sanctum');

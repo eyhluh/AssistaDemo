@@ -12,7 +12,7 @@ import { BsPencilSquare, BsTrash } from "react-icons/bs";
 import type { ApplicantColumns } from "../../../interfaces/ApplicantInterface";
 import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
 import Spinner from "../../../components/Spinner/Spinner";
-import ApplicantService from "../../../services/ApplicantService";
+import ApplicationService from "../../../services/ApplicationService";
 
 interface ApplicantListProps {
   onAddApplicant: () => void;
@@ -47,19 +47,19 @@ const ApplicantList: FC<ApplicantListProps> = ({
     try {
       setLoadingApplicants(true);
 
-      const res = await ApplicantService.loadApplicants(page, search);
+      const res = await ApplicationService.loadApplications(search);
 
       if (res.status === 200) {
-        const applicantsData =
-          res.data.applicants.data || res.data.applicants || [];
+        const applicationsData =
+          res.data.applications.data || res.data.applications || [];
         const lastPage =
-          res.data.applicants.last_page ||
+          res.data.applications.last_page ||
           res.data.last_page ||
           applicantsTableLastPages ||
           1;
 
         setApplicants(
-          append ? [...applicants, ...applicantsData] : applicantsData
+          append ? [...applicants, ...applicationsData] : applicationsData
         );
         setApplicantsTableCurrentPage(page);
         setApplicantsTableLastPages(lastPage);
@@ -69,7 +69,9 @@ const ApplicantList: FC<ApplicantListProps> = ({
         setHasMore(false);
       }
     } catch (error) {
-      throw error;
+      console.error("Error loading applications:", error);
+      setApplicants(append ? applicants : []);
+      setHasMore(false);
     } finally {
       setLoadingApplicants(false);
     }
@@ -154,7 +156,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
                 <div className="p-4 flex justify-between">
                   <div className="w-64">
                     <FloatingLabelInput
-                      label="Search Applicants"
+                      label="Search Applications"
                       type="text"
                       name="search"
                       value={search}
@@ -167,7 +169,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-lg transition-colors cursor-pointer"
                     onClick={onAddApplicant}
                   >
-                    Add Applicant
+                    Add Application
                   </button>
                 </div>
               </div>
@@ -196,13 +198,25 @@ const ApplicantList: FC<ApplicantListProps> = ({
                   isHeader
                   className="px-5 py-3 font-medium text-start"
                 >
+                  Contact Number
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Gmail
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
                   Crisis
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-start"
                 >
-                  Birth Date
+                  Attached Files
                 </TableCell>
                 <TableCell
                   isHeader
@@ -217,7 +231,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
                 applicants.map((applicant, index) => (
                   <TableRow
                     className="hover:bg-gray-100"
-                    key={applicant.applicant_id}
+                    key={applicant.application_id || applicant.applicant_id}
                   >
                     <TableCell className="px-4 py-3 text-center">
                       {index + 1}
@@ -226,13 +240,30 @@ const ApplicantList: FC<ApplicantListProps> = ({
                       {handleApplicantFullNameFormat(applicant)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-start">
-                      {applicant.gender.gender}
+                      {applicant.gender?.gender || "N/A"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-start">
-                      {applicant.crisis.crisis}
+                      {applicant.contact_number}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-start">
-                      {applicant.birth_date}
+                      {applicant.gmail}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-start">
+                      {applicant.crisis?.crisis || "N/A"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-start">
+                      {applicant.attached_file_url ? (
+                        <a
+                          href={applicant.attached_file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          View File
+                        </a>
+                      ) : (
+                        "No File"
+                      )}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-center">
                       <div className="flex gap-3 justify-center">
@@ -240,7 +271,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
                           type="button"
                           className="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50 transition-colors"
                           //onClick={() => onEditApplicant(applicant)}
-                          title="Edit Applicant"
+                          title="Edit Application"
                         >
                           <BsPencilSquare className="w-5 h-5" />
                         </button>
@@ -248,7 +279,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
                           type="button"
                           className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
                           //onClick={() => onDeleteApplicant(applicant)}
-                          title="Delete Applicant"
+                          title="Delete Application"
                         >
                           <BsTrash className="w-5 h-5" />
                         </button>
@@ -259,7 +290,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
               ) : !loadingApplicants && applicants.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={8}
                     className="px-4 py-3 text-center font-medium"
                   >
                     No Records Found
@@ -268,14 +299,14 @@ const ApplicantList: FC<ApplicantListProps> = ({
               ) : null}
               {loadingApplicants && applicants.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="px-4 py-3 text-center">
+                  <TableCell colSpan={8} className="px-4 py-3 text-center">
                     <Spinner size="md" />
                   </TableCell>
                 </TableRow>
               )}
               {loadingApplicants && applicants.length > 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="px-4 py-3 text-center">
+                  <TableCell colSpan={8} className="px-4 py-3 text-center">
                     <Spinner size="md" />
                   </TableCell>
                 </TableRow>

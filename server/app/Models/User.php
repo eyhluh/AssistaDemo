@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -19,18 +18,16 @@ class User extends Authenticatable
 
     /**
      * The attributes that are mass assignable.
+     * Updated for registration-only fields
      *
      * @var list<string>
      */
     protected $fillable = [
         'first_name',
-        'profile_picture',
         'middle_name',
         'last_name',
         'suffix_name',
-        'gender_id',
-        'birth_date',
-        'age',
+        'contact_number',
         'gmail',
         'password',
         'is_deleted'
@@ -54,14 +51,9 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'is_deleted' => 'boolean',
         ];
     }
-
-    public function gender(): BelongsTo
-    {
-        return $this->belongsTo(Gender::class, 'gender_id', 'gender_id');
-    }
-
 
     /**
      * Get the name of the unique identifier for the user.

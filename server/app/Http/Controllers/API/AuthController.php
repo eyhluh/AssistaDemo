@@ -7,9 +7,39 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'first_name' => ['required', 'max:55'],
+            'middle_name' => ['nullable', 'max:55'],
+            'last_name' => ['required', 'max:55'],
+            'suffix_name' => ['nullable', 'max:55'],
+            'contact_number' => ['required', 'string', 'max:20'],
+            'gmail' => ['required', 'email', 'max:255', Rule::unique('tbl_users', 'gmail')],
+            'password' => ['required', 'min:6', 'confirmed'],
+            'password_confirmation' => ['required', 'min:6']
+        ]);
+
+        User::create([
+            'first_name' => $validated['first_name'],
+            'middle_name' => $validated['middle_name'],
+            'last_name' => $validated['last_name'],
+            'suffix_name' => $validated['suffix_name'],
+            'contact_number' => $validated['contact_number'],
+            'gmail' => $validated['gmail'],
+            'password' => $validated['password'],
+            'is_deleted' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Registration successful! Please log in.'
+        ], 201);
+    }
+
     public function login(Request $request)
     {
         $validated = $request->validate([
@@ -17,8 +47,7 @@ class AuthController extends Controller
             'password' => ['required', 'min:6']
         ]);
 
-        $user = User::with(['gender'])
-            ->where('gmail', $validated['gmail'])
+        $user = User::where('gmail', $validated['gmail'])
             ->where('is_deleted', false)
             ->first();
 
@@ -34,9 +63,6 @@ class AuthController extends Controller
         $user->tokens()->delete();
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        // Format profile picture URL
-        $user->profile_picture = $user->profile_picture ? url('storage/public/img/user/profile_picture/' . $user->profile_picture) : null;
 
         return response()->json([
             'user' => $user,
@@ -55,10 +81,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        $user = $request->user()->load(['gender']);
-        
-        // Format profile picture URL
-        $user->profile_picture = $user->profile_picture ? url('storage/public/img/user/profile_picture/' . $user->profile_picture) : null;
+        $user = $request->user();
 
         return response()->json([
             'user' => $user

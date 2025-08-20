@@ -3,26 +3,27 @@ import type { CrisisColumns } from "./CrisisInterface";
 import type { SituationColumns } from "./SituationInterface";
 
 export interface ApplicantColumns {
-  applicant_id: number;
+  applicant_id?: number; // For backward compatibility
+  application_id?: number; // For new applications table
   first_name: string;
   middle_name?: string;
   last_name: string;
   suffix_name?: string;
-  gender: GenderColumns;
+  gender?: GenderColumns;
   birth_date: string;
   age: number | string;
   
   contact_number: string;
   gmail: string;
-  house_no: string;
-  street: string;
+  house_no?: string;
+  street?: string;
   subdivision?: string;
-  barangay: string;
-  city: string;
+  barangay?: string;
+  city?: string;
 
-  crisis: CrisisColumns;
-  incident_date: string;
-  situation: SituationColumns;
+  crisis?: CrisisColumns;
+  incident_date?: string;
+  situation?: SituationColumns;
 
   attached_file?: string;
   attached_file_url?: string;
@@ -38,6 +39,7 @@ export interface ApplicantFieldErrors {
   last_name?: string[];
   suffix_name?: string[];
   gender?: string[];
+  civil_status?: string[];
   birth_date?: string[];
   age?: string[];
   

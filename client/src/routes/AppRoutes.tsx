@@ -11,6 +11,7 @@ import EditCrisisPage from "../pages/Crisis/EditCrisisPage";
 import DeleteCrisisPage from "../pages/Crisis/DeleteCrisisPage";
 import UserMainPage from "../pages/User/UserMainPage";
 import LoginPage from "../pages/Auth/LoginPage";
+import RegisterPage from "../pages/Auth/RegisterPage";
 import DashMainPage from "../pages/Dashboard/DashMainPage";
 import { AuthProvider } from "../contexts/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
@@ -21,8 +22,11 @@ const AppRoutes = () => {
     <>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          {/* Public routes - Registration flow first */}
+          <Route path="/" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
 
+          {/* Protected routes */}
           <Route
             element={
               <ProtectedRoute>

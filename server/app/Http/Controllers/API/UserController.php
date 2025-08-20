@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,12 +11,9 @@ class UserController extends Controller
 {
     public function loadUsers(Request $request)
     {
-
         $search = $request->input('search');
 
-        $users = User::with(['gender','crisis'])
-            ->leftJoin('tbl_genders', 'tbl_users.gender_id', '=', 'tbl_genders.gender_id')
-            ->where('tbl_users.is_deleted', false)
+        $users = User::where('tbl_users.is_deleted', false)
             ->orderBy('tbl_users.last_name', 'asc')
             ->orderBy('tbl_users.first_name', 'asc')
             ->orderBy('tbl_users.middle_name', 'asc')
@@ -29,20 +25,12 @@ class UserController extends Controller
                     ->orWhere('tbl_users.middle_name', 'like', "%{$search}%")
                     ->orWhere('tbl_users.last_name', 'like', "%{$search}%")
                     ->orWhere('tbl_users.suffix_name', 'like', "%{$search}%")
-                    ->orWhere('tbl_genders.gender', 'like', "%{$search}%");
-                
+                    ->orWhere('tbl_users.contact_number', 'like', "%{$search}%")
+                    ->orWhere('tbl_users.gmail', 'like', "%{$search}%");
             });
         }
 
         $users = $users->paginate(15);
-
-        $users->getCollection()->transform(function ($user) {
-            $user->profile_picture = $user->profile_picture ? url('storage/public/img/user/profile_picture/' . 
-            $user->profile_picture) : null;
-
-            return $user;
-        });
-
 
         return response()->json([
             'users' => $users
@@ -52,44 +40,29 @@ class UserController extends Controller
     public function storeUser(Request $request)
     {
         $validated = $request->validate([
-            'add_user_profile_picture' => ['nullable','image','mimes:jpeg,png,jpg,gif,svg,pdf'],
             'first_name' => ['required', 'max:55'],
             'middle_name' => ['nullable', 'max:55'],
             'last_name' => ['required', 'max:55'],
             'suffix_name' => ['nullable', 'max:55'],
-            'gender' => ['required'],
-            'birth_date' => ['required', 'date'],
-            'gmail' => ['required', 'min:6', 'max:20', Rule::unique('tbl_users', 'gmail')],
-            'password' => ['required', 'min:6', 'max:12', 'confirmed'],
-            'password_confirmation' => ['required', 'min:6', 'max:12']
+            'contact_number' => ['required', 'string', 'max:20'],
+            'gmail' => ['required', 'email', 'max:255', Rule::unique('tbl_users', 'gmail')],
+            'password' => ['required', 'min:6', 'confirmed'],
+            'password_confirmation' => ['required', 'min:6']
         ]);
 
-        if ($request->hasFile('add_user_profile_picture')) {
-            $filenameWithExtension = $request->file('add_user_profile_picture');
-            $filename = pathinfo($filenameWithExtension, PATHINFO_FILENAME);
-            $extension = $filenameWithExtension->getClientOriginalExtension();
-            $filenameToStore = sha1($filename . '.' .  time() . '.' . $extension);
-            $filenameWithExtension->storeAs('public/img/user/profile_picture', $filenameToStore);
-            $validated['add_user_profile_picture'] = $filenameToStore;
-        }
-
-        $age = date_diff(date_create($validated['birth_date']), date_create('now'))->y;
-
         User::create([
-            'profile_picture' => $validated['add_user_profile_picture'],
             'first_name' => $validated['first_name'],
             'middle_name' => $validated['middle_name'],
             'last_name' => $validated['last_name'],
             'suffix_name' => $validated['suffix_name'],
-            'gender_id' => $validated['gender'],
-            'birth_date' => $validated['birth_date'],
-            'age' => $age,
+            'contact_number' => $validated['contact_number'],
             'gmail' => $validated['gmail'],
             'password' => $validated['password'],
+            'is_deleted' => false,
         ]);
 
         return response()->json([
-            'message' => 'User Succesfully Saved.'
+            'message' => 'User Successfully Saved.'
         ], 200);
     }
 
@@ -100,45 +73,18 @@ class UserController extends Controller
             'middle_name' => ['nullable', 'max:55'],
             'last_name' => ['required', 'max:55'],
             'suffix_name' => ['nullable', 'max:55'],
-            'gender' => ['required'],
-            'birth_date' => ['required', 'date'],
-            'gmail' => ['required', 'min:6', 'max:20', Rule::unique('tbl_users', 'gmail')->ignore($user)],
+            'contact_number' => ['required', 'string', 'max:20'],
+            'gmail' => ['required', 'email', 'max:255', Rule::unique('tbl_users', 'gmail')->ignore($user)],
         ]);
-        
-        if ($request->has('remove_profile_picture') && $request->remove_profile_picture == '1') {
-            if ($user->profile_picture && Storage::exists('public/img/user/profile_picture/' . $user->profile_picture)) {
-                Storage::delete('public/img/user/profile_picture/' . $user->profile_picture);
-                $user->profile_picture = null;
-            }
-        } elseif ($request->hasFile('edit_user_profile_picture')) {
-            if ($user->profile_picture && Storage::exists('public/img/user/profile_picture/' . $user->profile_picture)) {
-                Storage::delete('public/img/user/profile_picture/' . $user->profile_picture);
-            }
-
-            $filenameWithExtension = $request->file('edit_user_profile_picture');
-            $filename = pathinfo($filenameWithExtension, PATHINFO_FILENAME);
-            $extension = $filenameWithExtension->getClientOriginalExtension();
-            $filenameToStore = sha1($filename . '.' . time() . '.' . $extension);
-            $filenameWithExtension->storeAs('public/img/user/profile_picture', $filenameToStore);
-            $validated['edit_user_profile_picture'] = $filenameToStore;
-        }
-
-        $age = date_diff(date_create($validated['birth_date']), date_create('now'))->y;
 
         $user->update([
-            'profile_picture' => $validated['edit_user_profile_picture'] ?? $user->profile_picture,
             'first_name' => $validated['first_name'],
             'middle_name' => $validated['middle_name'],
             'last_name' => $validated['last_name'],
             'suffix_name' => $validated['suffix_name'],
-            'gender_id' => $validated['gender'],
-            'birth_date' => $validated['birth_date'],
-            'age' => $age,
+            'contact_number' => $validated['contact_number'],
             'gmail' => $validated['gmail'],
         ]);
-
-        $user->profile_picture = $user->profile_picture ? url('storage/public/img/user/profile_picture/' . 
-        $user->profile_picture) : null;
 
         return response()->json([
             'message' => 'User Successfully Updated.',
@@ -153,7 +99,7 @@ class UserController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'User Succesfully Deleted.'
+            'message' => 'User Successfully Deleted.'
         ], 200);
     }
 }

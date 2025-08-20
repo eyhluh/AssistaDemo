@@ -69,11 +69,24 @@ const LoginForm: FC<LoginFormProps> = ({ message }) => {
           />
         </div>
         <SubmitButton
-          className="w-full"
+          className="w-full mb-4"
           label="Sign In"
           loading={isloading}
           loadingLabel="Signing In..."
         />
+
+        <div className="text-center">
+          <p className="text-gray-600">
+            Don't have an account?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Sign Up
+            </button>
+          </p>
+        </div>
       </form>
     </>
   );

@@ -1,7 +1,32 @@
 import AxiosInstance from "./AxiosInstance"
 
+interface RegisterData {
+    first_name: string;
+    middle_name?: string;
+    last_name: string;
+    suffix_name?: string;
+    contact_number: string;
+    gmail: string;
+    password: string;
+    password_confirmation: string;
+}
+
+interface LoginData {
+    gmail: string;
+    password: string;
+}
+
 const AuthService = {
-    login: async (data: any) => {
+    register: async (data: RegisterData) => {
+        try {
+            const response = await AxiosInstance.post('/auth/register', data)
+            return response
+        } catch (error) {
+            throw error
+        }
+    },
+
+    login: async (data: LoginData) => {
         try {
             const response = await AxiosInstance.post('/auth/login', data)
             return response
@@ -18,6 +43,7 @@ const AuthService = {
             throw error
         }
     },
+    
     me: async () => {
         try {
             const response = await AxiosInstance.get('auth/me')
