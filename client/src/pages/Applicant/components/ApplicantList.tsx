@@ -16,15 +16,15 @@ import ApplicationService from "../../../services/ApplicationService";
 
 interface ApplicantListProps {
   onAddApplicant: () => void;
-  //onEditApplicant: (applicant: ApplicantColumns | null) => void;
-  //onDeleteApplicant: (applicant: ApplicantColumns | null) => void;
+  onEditApplicant: (applicant: ApplicantColumns | null) => void;
+  onDeleteApplicant: (applicant: ApplicantColumns | null) => void;
   refreshKey: boolean;
 }
 
 const ApplicantList: FC<ApplicantListProps> = ({
   onAddApplicant,
-  //onEditApplicant,
-  //onDeleteApplicant,
+  onEditApplicant,
+  onDeleteApplicant,
   refreshKey,
 }) => {
   const [loadingApplicants, setLoadingApplicants] = useState(false);
@@ -270,7 +270,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
                         <button
                           type="button"
                           className="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50 transition-colors"
-                          //onClick={() => onEditApplicant(applicant)}
+                          onClick={() => onEditApplicant(applicant)}
                           title="Edit Application"
                         >
                           <BsPencilSquare className="w-5 h-5" />
@@ -278,7 +278,7 @@ const ApplicantList: FC<ApplicantListProps> = ({
                         <button
                           type="button"
                           className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                          //onClick={() => onDeleteApplicant(applicant)}
+                          onClick={() => onDeleteApplicant(applicant)}
                           title="Delete Application"
                         >
                           <BsTrash className="w-5 h-5" />

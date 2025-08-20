@@ -1,17 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  BsCalendar3,
-  BsPeople,
-  BsLightningCharge,
-  BsBarChart,
-  BsGenderMale,
-  BsGenderFemale,
-  BsPersonPlus,
-} from "react-icons/bs";
+import { BsFileEarmark, BsEnvelope, BsTelephone } from "react-icons/bs";
 import StatisticsService from "../../../services/StatisticsService";
 import type {
   DashboardStats,
-  GenderStat,
   RecentActivity,
 } from "../../../interfaces/StatisticsInterface";
 import AddApplicantFormModal from "../../Applicant/components/AddApplicantFormModal";
@@ -19,7 +10,8 @@ import { useModal } from "../../../hooks/useModal";
 import { useToastMessage } from "../../../hooks/useToastMessage";
 import { useRefresh } from "../../../hooks/useRefresf";
 import ToastMessage from "../../../components/ToastMessage/ToastMessage";
-import { MdAdd, MdAddCircle } from "react-icons/md";
+import { MdAddCircle } from "react-icons/md";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // Main Dashboard component
 const Dashboard = () => {
@@ -40,6 +32,7 @@ const Dashboard = () => {
   const { message, isFailed, isVisible, showToastMessage, closeToastMessage } =
     useToastMessage("", false, false);
   const { refresh, handleRefresh } = useRefresh(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const today = new Date();
@@ -53,6 +46,23 @@ const Dashboard = () => {
 
     fetchDashboardStats();
   }, [refresh]);
+
+  // User name formatting function (similar to AppHeader)
+  const handleUserFullNameFormat = () => {
+    if (!user) return "";
+
+    let fullName = `${user.user.last_name}, ${user.user.first_name}`;
+
+    if (user.user.middle_name) {
+      fullName += ` ${user.user.middle_name.charAt(0)}.`;
+    }
+
+    if (user.user.suffix_name) {
+      fullName += ` ${user.user.suffix_name}`;
+    }
+
+    return fullName;
+  };
 
   // Callback functions for AddApplicantFormModal
   const onApplicantAdded = (message: string) => {
@@ -100,191 +110,132 @@ const Dashboard = () => {
     }
   };
 
-  // const getGenderCount = (genderName: string) => {
-  //   const gender = stats.genderStats.find(
-  //     (g: GenderStat) => g.gender.toLowerCase() === genderName.toLowerCase()
-  //   );
-  //   return gender ? gender.count : 0;
-  // };
-
-  // const getMaleCount = () => getGenderCount("male");
-  // const getFemaleCount = () => getGenderCount("female");
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header Section */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <div className="text-right text-gray-600 font-medium">
-              {currentDate}
-            </div>
-            <button
-              onClick={() => openModal()}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-            >
-              <MdAddCircle className="w-5 h-5" />
-              Apply for Assistance
-            </button>
-          </div>
-        </div>
-        <p className="text-gray-600">Welcome </p>
-      </div>
+    <div className="min-h-screen bg-gray-100 p-2 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+            {/* Left Side - User Information */}
+            <div className="flex-1">
+              {/* User Welcome Section */}
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div className="space-y-3">
+                  {/* Welcome Message */}
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
+                      Welcome {handleUserFullNameFormat()}
+                    </h2>
+                  </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Current Date Card */}
-        {/* <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-6 rounded-lg shadow-lg">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <BsCalendar3 className="w-8 h-8" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold">Current Date</h3>
-              <p className="text-2xl font-bold mt-1">{currentDate}</p>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Total Users Card */}
-        {/* <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <BsPeople className="w-8 h-8" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold">Total Users</h3>
-              <p className="text-2xl font-bold mt-1">
-                {stats.totalUsers.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Male Users Card */}
-        {/* <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <BsGenderMale className="w-8 h-8" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold">Male Users</h3>
-              <p className="text-2xl font-bold mt-1">
-                {getMaleCount().toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Female Users Card */}
-        {/* <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white p-6 rounded-lg shadow-lg">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <BsGenderFemale className="w-8 h-8" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold">Female Users</h3>
-              <p className="text-2xl font-bold mt-1">
-                {getFemaleCount().toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div> */}
-      </div>
-
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity Card */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-            <BsLightningCharge className="w-5 h-5 mr-2" />
-            Recent Activity
-          </h3>
-          <div className="space-y-4">
-            {stats.recentActivities.length > 0 ? (
-              stats.recentActivities.map(
-                (activity: RecentActivity, index: number) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                      <span className="text-gray-700">{activity.message}</span>
-                    </div>
-                    <span className="text-gray-500 text-sm">
-                      {activity.time}
+                  {/* Email */}
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <BsEnvelope className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm sm:text-base break-all">
+                      {user?.user?.gmail || "No email available"}
                     </span>
                   </div>
-                )
-              )
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>No recent activities</p>
+
+                  {/* Contact Number */}
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <BsTelephone className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">
+                      {user?.user?.contact_number ||
+                        "No contact number available"}
+                    </span>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Date and Action Button */}
+            <div className="flex flex-col items-start lg:items-end gap-4">
+              {/* <div className="text-gray-600 font-medium text-sm sm:text-base">
+                {currentDate}
+              </div> */}
+
+              {/* Apply for Assistance Button */}
+              <button
+                onClick={() => openModal()}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg font-medium"
+              >
+                <MdAddCircle className="w-5 h-5" />
+                Apply for Assistance
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-            <BsLightningCharge className="w-5 h-5 mr-2" />
-            Recent Activity
-          </h3>
-          <div className="space-y-4">
-            {stats.recentActivities.length > 0 ? (
-              stats.recentActivities.map(
-                (activity: RecentActivity, index: number) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                      <span className="text-gray-700">{activity.message}</span>
+        {/* Content Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+          {/* Recent Activity Card */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
+              {/* <BsLightningCharge className="w-5 h-5 mr-2" /> */}
+              Active / Ongoing Application
+            </h3>
+            <div className="space-y-4">
+              {stats.recentActivities.length > 0 ? (
+                stats.recentActivities.map(
+                  (activity: RecentActivity, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-150"
+                    >
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-3 flex-shrink-0"></div>
+                        <span className="text-gray-700 text-sm sm:text-base">
+                          {activity.message}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 text-xs sm:text-sm ml-2 flex-shrink-0">
+                        {activity.time}
+                      </span>
                     </div>
-                    <span className="text-gray-500 text-sm">
-                      {activity.time}
-                    </span>
-                  </div>
+                  )
                 )
-              )
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>No recent activities</p>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <BsFileEarmark className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium">No Active Application</p>
+                  <p className="text-sm mt-1">
+                    {/* Activities will appear here when available */}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </div> */}
 
-        {/* Quick Stats Card */}
-        {/* <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">
-            <BsBarChart className="w-5 h-5 mr-2" />
-            Quick Statistics
-          </h3>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-700">Active Sessions</span>
-              <span className="font-semibold text-blue-600">
-                {stats.systemStats.activeSessions}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-700">New Users Today</span>
-              <span className="font-semibold text-green-600">
-                {stats.systemStats.newUsersToday}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-700">System Load</span>
-              <span className="font-semibold text-yellow-600">
-                {stats.systemStats.systemLoad}%
-              </span>
+          {/* Placeholder for future content */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+              Quick Actions
+            </h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-800 mb-2">Need Help?</h4>
+                <p className="text-blue-600 text-sm mb-3">
+                  Get assistance with your application or account
+                </p>
+                <button
+                  onClick={() => openModal()}
+                  className="text-blue-600 hover:text-blue-800 font-medium text-sm underline"
+                >
+                  Start Application →
+                </button>
+              </div>
+
+              {/* <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <h4 className="font-medium text-green-800 mb-2">
+                  System Status
+                </h4>
+                <p className="text-green-600 text-sm">
+                  All systems operational
+                </p>
+              </div> */}
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
 
       {/* Add Applicant Form Modal */}

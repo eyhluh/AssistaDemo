@@ -23,11 +23,11 @@ const SituationMainPage = () => {
 
   useEffect(() => {
     if (location.state?.message) {
-      showToastMessage(location.state.message);
-      handleRefresh;
+      showToastMessage(location.state.message, false);
+      handleRefresh();
       window.history.replaceState({}, document.title);
     }
-  }, [location.state, showToastMessage]);
+  }, [location.state, showToastMessage, handleRefresh]);
   return (
     <>
       <ToastMessage

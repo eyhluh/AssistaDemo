@@ -64,7 +64,7 @@ const AppHeader = () => {
                 aria-controls="logo-sidebar"
                 type="button"
                 onClick={toggleSidebar}
-                className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                className="inline-flex items-center p-2 text-sm text-gray-600 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
               >
                 <span className="sr-only">Open sidebar</span>
                 <svg
@@ -86,7 +86,7 @@ const AppHeader = () => {
                   className="h-8 me-3"
                   alt="Assista Logo"
                 />
-                <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
+                <span className="self-center text-xl text-gray-900 font-semibold sm:text-2xl whitespace-nowrap">
                   Assista
                 </span>
               </a>
@@ -125,7 +125,7 @@ const AppHeader = () => {
                   id="dropdown-user`}
                 >
                   <div className="px-4 py-3" role="none">
-                    <p className="text-sm text-gray-900" role="none">
+                    <p className="text-sm text-gray-600" role="none">
                       {handleUserFullNameFormat()}
                     </p>
                   </div>

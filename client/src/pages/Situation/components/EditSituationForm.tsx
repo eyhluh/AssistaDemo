@@ -3,7 +3,7 @@ import BackButton from "../../../components/Button/BackButton";
 import SubmitButton from "../../../components/Button/SubmitButton";
 import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
 import SituationService from "../../../services/SituationService";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Spinner from "../../../components/Spinner/Spinner";
 import type { SituationFieldErrors } from "../../../interfaces/SituationInterface";
 
@@ -15,6 +15,7 @@ const EditSituationForm: FC<EditSituationFormProps> = ({
   onSituationUpdated,
 }) => {
   const { situation_id } = useParams();
+  const navigate = useNavigate();
   const [loadingGet, setLoadingGet] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [situation, setSituation] = useState("");
@@ -26,7 +27,7 @@ const EditSituationForm: FC<EditSituationFormProps> = ({
       const res = await SituationService.getSituation(situationId);
 
       if (res.status === 200) {
-        setSituation(res.data.Situation.Situation);
+        setSituation(res.data.situation.situation);
       } else {
         console.error(
           "Unexpected error occurred during getting Situation: ",
@@ -55,17 +56,33 @@ const EditSituationForm: FC<EditSituationFormProps> = ({
 
       if (res.status === 200) {
         setErrors({});
-        setSituation(res.data.Situation.Situation);
+        setSituation(res.data.situation.situation);
         onSituationUpdated(res.data.message);
+        // Navigate back to situations list after successful update
+        setTimeout(() => {
+          navigate("/Situations", {
+            state: { message: res.data.message },
+          });
+        }, 1500);
       } else {
         console.error(
           "Unexpected error occurred during updating Situation: ",
           res.data
         );
       }
-    } catch (error: any) {
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response: { status: number; data: { errors: SituationFieldErrors } };
+        };
+        if (axiosError.response && axiosError.response.status === 422) {
+          setErrors(axiosError.response.data.errors);
+        } else {
+          console.error(
+            "Unexpected server error occurred during updating Situation: ",
+            error
+          );
+        }
       } else {
         console.error(
           "Unexpected server error occurred during updating Situation: ",

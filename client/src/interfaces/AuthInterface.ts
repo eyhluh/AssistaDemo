@@ -3,15 +3,10 @@ export interface UserDetails {
         user_id: number;
         profile_picture?: string;
         first_name: string;
-        middle_name: string;
+        middle_name?: string;
         last_name: string;
-        suffix_name: string;
-        gender: {
-            gender_id: number;
-            gender: string;
-        }
-        birth_date: string;
-        age: string | number;
+        suffix_name?: string;
+        contact_number?: string;
         gmail: string;
     }
     token?: string

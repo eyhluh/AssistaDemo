@@ -3,7 +3,7 @@ import BackButton from "../../../components/Button/BackButton";
 import SubmitButton from "../../../components/Button/SubmitButton";
 import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
 import CrisisService from "../../../services/CrisisService";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Spinner from "../../../components/Spinner/Spinner";
 import type { CrisisFieldErrors } from "../../../interfaces/CrisisInterface";
 
@@ -13,6 +13,7 @@ interface EditCrisisFormProps {
 
 const EditCrisisForm: FC<EditCrisisFormProps> = ({ onCrisisUpdated }) => {
   const { crisis_id } = useParams();
+  const navigate = useNavigate();
   const [loadingGet, setLoadingGet] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [crisis, setCrisis] = useState("");
@@ -55,15 +56,31 @@ const EditCrisisForm: FC<EditCrisisFormProps> = ({ onCrisisUpdated }) => {
         setErrors({});
         setCrisis(res.data.crisis.crisis);
         onCrisisUpdated(res.data.message);
+        // Navigate back to crisis list after successful update
+        setTimeout(() => {
+          navigate("/crisiss", {
+            state: { message: res.data.message },
+          });
+        }, 1500);
       } else {
         console.error(
           "Unexpected error occurred during updating crisis: ",
           res.data
         );
       }
-    } catch (error: any) {
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response: { status: number; data: { errors: CrisisFieldErrors } };
+        };
+        if (axiosError.response && axiosError.response.status === 422) {
+          setErrors(axiosError.response.data.errors);
+        } else {
+          console.error(
+            "Unexpected server error occurred during updating crisis: ",
+            error
+          );
+        }
       } else {
         console.error(
           "Unexpected server error occurred during updating crisis: ",
@@ -97,7 +114,7 @@ const EditCrisisForm: FC<EditCrisisFormProps> = ({ onCrisisUpdated }) => {
         <form onSubmit={handleUpdatecrisis}>
           <div className="mb-4">
             <FloatingLabelInput
-              label="crisis"
+              label="Crisis"
               type="text"
               name="crisis"
               value={crisis}
@@ -108,12 +125,12 @@ const EditCrisisForm: FC<EditCrisisFormProps> = ({ onCrisisUpdated }) => {
             />
           </div>
           <div className="flex justify-end gap-2">
-            {!loadingUpdate && <BackButton label="Back" path="/crisiss" />}
+            <BackButton label="Back" path="/crisiss" />
 
             <SubmitButton
-              label="Edit crisis"
+              label="Edit Crisis"
               loading={loadingUpdate}
-              loadingLabel="Upadting crisis..."
+              loadingLabel="Updating Crisis..."
             />
           </div>
         </form>
