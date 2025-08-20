@@ -72,6 +72,7 @@ class ApplicationController extends Controller
             'suffix_name' => ['nullable', 'max:55'],
             'birth_date' => ['required', 'date'],
             'gender' => ['required'], // This is gender_id from frontend
+            'civil_status' => ['required', 'string', 'max:50'], // Added civil_status validation
 
             // Contact Information
             'contact_number' => ['required', 'string', 'max:20'],
@@ -84,6 +85,7 @@ class ApplicationController extends Controller
 
             // Crisis Details
             'crisis' => ['required'], // This is crisis_id from frontend
+            'incident_date' => ['required', 'date'], // Added incident_date validation
             'situation' => ['required'], // This is situation_id from frontend
 
             // Attached File
@@ -109,7 +111,9 @@ class ApplicationController extends Controller
             'last_name' => $validated['last_name'],
             'suffix_name' => $validated['suffix_name'],
             'gender_id' => $validated['gender'],
+            'civil_status' => $validated['civil_status'], // Added civil_status field
             'crisis_id' => $validated['crisis'],
+            'incident_date' => $validated['incident_date'], // Added incident_date field
             'birth_date' => $validated['birth_date'],
             'age' => $age,
             'gmail' => $validated['gmail'],
@@ -138,6 +142,7 @@ class ApplicationController extends Controller
             'suffix_name' => ['nullable', 'max:55'],
             'birth_date' => ['required', 'date'],
             'gender' => ['required'],
+            'civil_status' => ['required', 'string', 'max:50'], // Added civil_status validation
 
             // Contact Information
             'contact_number' => ['required', 'string', 'max:20'],
@@ -150,6 +155,7 @@ class ApplicationController extends Controller
 
             // Crisis Details
             'crisis' => ['required'],
+            'incident_date' => ['required', 'date'], // Added incident_date validation
             'situation' => ['required'], // This is situation_id from frontend
 
             // Attached File
@@ -186,7 +192,9 @@ class ApplicationController extends Controller
             'last_name' => $validated['last_name'],
             'suffix_name' => $validated['suffix_name'],
             'gender_id' => $validated['gender'],
+            'civil_status' => $validated['civil_status'], // Added civil_status field
             'crisis_id' => $validated['crisis'],
+            'incident_date' => $validated['incident_date'], // Added incident_date field
             'birth_date' => $validated['birth_date'],
             'age' => $age,
             'gmail' => $validated['gmail'],

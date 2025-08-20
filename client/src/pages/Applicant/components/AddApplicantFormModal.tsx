@@ -138,6 +138,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
       formData.append("last_name", lastName);
       formData.append("suffix_name", suffixName || "");
       formData.append("gender", gender);
+      formData.append("civil_status", civilStatus);
       formData.append("birth_date", birthDate);
 
       // Contact Information
@@ -155,6 +156,12 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
       // File attachment
       if (attachedFile) {
         formData.append("add_applicant_file", attachedFile);
+      }
+
+      // Debug logging
+      console.log("Form data being sent:");
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
       }
 
       const res = await ApplicationService.storeApplication(formData);
