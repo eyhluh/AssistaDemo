@@ -46,18 +46,13 @@ class DatabaseSeeder extends Seeder
             ['crisis' => 'Medecine Finacial'],
             ['crisis' => 'Hospitalized'],
         ]);
-            
-        $birthDate = fake()->date();
-        $age = date_diff(date_create($birthDate), date_create('now'))->y;  
 
         User::factory()->create([
             "first_name" => "Prince Lorenzo",
             "middle_name" => "R",
             "last_name" => "Mentino",
             "suffix_name" => null,
-            "gender_id" => Gender::inRandomOrder()->first()->gender_id,
-            "birth_date" => $birthDate,
-            "age" => $age,
+            "contact_number" => "09123456789",
             "gmail" => "Assista@gmail.com",
             "password" => "admin123"
         ]);

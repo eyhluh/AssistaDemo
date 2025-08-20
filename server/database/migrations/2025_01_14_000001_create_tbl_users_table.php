@@ -31,16 +31,14 @@ return new class extends Migration
                 ->on('tbl_genders')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-
         });
-
     }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
-    {   
+    {
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('tbl_users');
         Schema::enableForeignKeyConstraints();
