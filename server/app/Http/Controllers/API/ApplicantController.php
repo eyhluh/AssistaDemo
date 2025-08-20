@@ -10,13 +10,13 @@ use Illuminate\Validation\Rule;
 
 class ApplicantController extends Controller
 {
-   
+
     public function loadApplicants(Request $request)
     {
         $search = $request->input('search');
 
         // Select specific columns to avoid conflicts and optimize query
-        $applicants = Applicant::with(['gender','crisis'])
+        $applicants = Applicant::with(['gender', 'crisis'])
             ->leftJoin('tbl_genders', 'tbl_applicants.gender_id', '=', 'tbl_genders.gender_id')
             ->leftJoin('tbl_crisiss', 'tbl_applicants.crisis_id', '=', 'tbl_crisiss.crisis_id')
             ->select(
@@ -46,12 +46,12 @@ class ApplicantController extends Controller
         // Transform collection to add full URLs for attached_file
         $applicants->getCollection()->transform(function ($applicant) {
             // Check if attached_file exists and append full URL
-            $applicant->attached_file_url = $applicant->attached_file ? 
-                                            url('storage/img/applicant/files/' . $applicant->attached_file) : null;
+            $applicant->attached_file_url = $applicant->attached_file ?
+                url('storage/img/applicant/files/' . $applicant->attached_file) : null;
 
             // Remove raw attached_file name if you only want URLs in the response
             unset($applicant->attached_file);
-            
+
             return $applicant;
         });
 
@@ -69,20 +69,20 @@ class ApplicantController extends Controller
             'last_name' => ['required', 'max:55'],
             'suffix_name' => ['nullable', 'max:55'],
             'birth_date' => ['required', 'date'],
-            'gender' => ['required'], // Assuming this is gender_id from frontend
+            'gender' => ['required'], // This is gender_id from frontend
 
             // Contact Information
-            'contact_number' => ['required', 'string', 'max:20'], 
-            'gmail' => ['required', 'min:6', 'max:255', Rule::unique('tbl_applicants', 'gmail')], 
-            'house_no' => ['required', 'string', 'max:100'],    
-            'street' => ['required', 'string', 'max:100'],      
+            'contact_number' => ['required', 'string', 'max:20'],
+            'gmail' => ['required', 'min:6', 'max:255', Rule::unique('tbl_applicants', 'gmail')],
+            'house_no' => ['required', 'string', 'max:100'],
+            'street' => ['required', 'string', 'max:100'],
             'subdivision' => ['nullable', 'string', 'max:100'],
-            'barangay' => ['required', 'string', 'max:100'],    
-            'city' => ['required', 'string', 'max:100'],        
-            
+            'barangay' => ['required', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100'],
+
             // Crisis Details
-            'crisis' => ['required'], // Assuming this is crisis_id from frontend
-            'situation' => ['required', 'string', 'max:255'], // Assuming this is situation_id from frontend
+            'crisis' => ['required'], // This is crisis_id from frontend
+            'situation' => ['required'], // This is situation_id from frontend
 
             // Attached File
             'add_applicant_file' => ['nullable', 'file', 'mimes:jpeg,pdf', 'max:5120'], // General attached file (e.g., medical cert)
@@ -117,7 +117,7 @@ class ApplicantController extends Controller
             'subdivision' => $validated['subdivision'],
             'barangay' => $validated['barangay'],
             'city' => $validated['city'],
-            'situation' => $validated['situation'],
+            'situation_id' => $validated['situation'], // Store as situation_id, not situation
             'is_deleted' => false, // Ensure default is_deleted status
         ]);
 
@@ -145,16 +145,16 @@ class ApplicantController extends Controller
             'subdivision' => ['nullable', 'string', 'max:100'],
             'barangay' => ['required', 'string', 'max:100'],
             'city' => ['required', 'string', 'max:100'],
-            
+
             // Crisis Details
             'crisis' => ['required'],
-            'situation' => ['required', 'string', 'max:255'],
+            'situation' => ['required'], // This is situation_id from frontend
 
             // Attached File
             'edit_applicant_file' => ['nullable', 'file', 'mimes:jpeg,pdf', 'max:5120'],
             'remove_attached_file' => ['nullable', 'boolean'],
         ]);
-        
+
         // Handle general attached file removal/update
         if ($request->has('remove_attached_file') && $request->remove_attached_file == '1') {
             if ($applicant->attached_file && Storage::exists('public/img/applicant/files/' . $applicant->attached_file)) {
@@ -194,13 +194,13 @@ class ApplicantController extends Controller
             'subdivision' => $validated['subdivision'],
             'barangay' => $validated['barangay'],
             'city' => $validated['city'],
-            'situation' => $validated['situation'],
+            'situation_id' => $validated['situation'], // Store as situation_id, not situation
         ]);
 
         // Transform the applicant object for the response, adding full URLs
-        $applicant->attached_file_url = $applicant->attached_file ? 
-                                        url('storage/img/applicant/files/' . $applicant->attached_file) : null;
-        
+        $applicant->attached_file_url = $applicant->attached_file ?
+            url('storage/img/applicant/files/' . $applicant->attached_file) : null;
+
         // Remove raw filenames if you prefer only URLs in the response
         unset($applicant->attached_file);
 

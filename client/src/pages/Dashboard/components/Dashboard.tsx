@@ -1,14 +1,24 @@
 import { useState, useEffect } from "react";
-import { 
-  BsCalendar3, 
-  BsPeople, 
+import {
+  BsCalendar3,
+  BsPeople,
   BsLightningCharge,
   BsBarChart,
   BsGenderMale,
-  BsGenderFemale
+  BsGenderFemale,
+  BsPersonPlus,
 } from "react-icons/bs";
 import StatisticsService from "../../../services/StatisticsService";
-import type { DashboardStats, GenderStat, RecentActivity } from "../../../interfaces/StatisticsInterface";
+import type {
+  DashboardStats,
+  GenderStat,
+  RecentActivity,
+} from "../../../interfaces/StatisticsInterface";
+import AddApplicantFormModal from "../../Applicant/components/AddApplicantFormModal";
+import { useModal } from "../../../hooks/useModal";
+import { useToastMessage } from "../../../hooks/useToastMessage";
+import { useRefresh } from "../../../hooks/useRefresf";
+import ToastMessage from "../../../components/ToastMessage/ToastMessage";
 
 // Main Dashboard component
 const Dashboard = () => {
@@ -20,9 +30,15 @@ const Dashboard = () => {
     systemStats: {
       activeSessions: 0,
       newUsersToday: 0,
-      systemLoad: 0
-    }
+      systemLoad: 0,
+    },
   });
+
+  // Modal and Toast state management
+  const { isOpen, openModal, closeModal } = useModal(false);
+  const { message, isFailed, isVisible, showToastMessage, closeToastMessage } =
+    useToastMessage("", false, false);
+  const { refresh, handleRefresh } = useRefresh(false);
 
   useEffect(() => {
     const today = new Date();
@@ -33,16 +49,26 @@ const Dashboard = () => {
       day: "numeric",
     };
     setCurrentDate(today.toLocaleDateString(undefined, options));
-    
+
     fetchDashboardStats();
-  }, []);
+  }, [refresh]);
+
+  // Callback functions for AddApplicantFormModal
+  const onApplicantAdded = (message: string) => {
+    showToastMessage(message, false);
+    handleRefresh();
+  };
+
+  const refreshKey = () => {
+    handleRefresh();
+  };
 
   const fetchDashboardStats = async () => {
     try {
-      console.log('Fetching dashboard stats...');
+      console.log("Fetching dashboard stats...");
       const response = await StatisticsService.getDashboardStats();
-      console.log('Dashboard response:', response);
-      
+      console.log("Dashboard response:", response);
+
       if (response.data.success) {
         setStats({
           totalUsers: response.data.data.total_users,
@@ -51,11 +77,11 @@ const Dashboard = () => {
           systemStats: {
             activeSessions: response.data.data.system_stats.active_sessions,
             newUsersToday: response.data.data.system_stats.new_users_today,
-            systemLoad: response.data.data.system_stats.system_load
-          }
+            systemLoad: response.data.data.system_stats.system_load,
+          },
         });
       } else {
-        console.error('Dashboard API returned success: false', response.data);
+        console.error("Dashboard API returned success: false", response.data);
       }
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
@@ -67,21 +93,21 @@ const Dashboard = () => {
         systemStats: {
           activeSessions: 0,
           newUsersToday: 0,
-          systemLoad: 0
-        }
+          systemLoad: 0,
+        },
       });
     }
   };
 
   const getGenderCount = (genderName: string) => {
-    const gender = stats.genderStats.find((g: GenderStat) => 
-      g.gender.toLowerCase() === genderName.toLowerCase()
+    const gender = stats.genderStats.find(
+      (g: GenderStat) => g.gender.toLowerCase() === genderName.toLowerCase()
     );
     return gender ? gender.count : 0;
   };
 
-  const getMaleCount = () => getGenderCount('male');
-  const getFemaleCount = () => getGenderCount('female');
+  const getMaleCount = () => getGenderCount("male");
+  const getFemaleCount = () => getGenderCount("female");
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -89,8 +115,17 @@ const Dashboard = () => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-          <div className="text-right text-gray-600 font-medium">
-            {currentDate}
+          <div className="flex items-center gap-4">
+            <div className="text-right text-gray-600 font-medium">
+              {currentDate}
+            </div>
+            <button
+              onClick={() => openModal()}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+            >
+              <BsPersonPlus className="w-4 h-4" />
+              Add Applicant
+            </button>
           </div>
         </div>
         <p className="text-gray-600">Welcome to your dashboard overview</p>
@@ -119,7 +154,9 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold">Total Users</h3>
-              <p className="text-2xl font-bold mt-1">{stats.totalUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold mt-1">
+                {stats.totalUsers.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -132,7 +169,9 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold">Male Users</h3>
-              <p className="text-2xl font-bold mt-1">{getMaleCount().toLocaleString()}</p>
+              <p className="text-2xl font-bold mt-1">
+                {getMaleCount().toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -145,7 +184,9 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold">Female Users</h3>
-              <p className="text-2xl font-bold mt-1">{getFemaleCount().toLocaleString()}</p>
+              <p className="text-2xl font-bold mt-1">
+                {getFemaleCount().toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -161,15 +202,22 @@ const Dashboard = () => {
           </h3>
           <div className="space-y-4">
             {stats.recentActivities.length > 0 ? (
-              stats.recentActivities.map((activity: RecentActivity, index: number) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-gray-700">{activity.message}</span>
+              stats.recentActivities.map(
+                (activity: RecentActivity, index: number) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                      <span className="text-gray-700">{activity.message}</span>
+                    </div>
+                    <span className="text-gray-500 text-sm">
+                      {activity.time}
+                    </span>
                   </div>
-                  <span className="text-gray-500 text-sm">{activity.time}</span>
-                </div>
-              ))
+                )
+              )
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <p>No recent activities</p>
@@ -187,19 +235,41 @@ const Dashboard = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-700">Active Sessions</span>
-              <span className="font-semibold text-blue-600">{stats.systemStats.activeSessions}</span>
+              <span className="font-semibold text-blue-600">
+                {stats.systemStats.activeSessions}
+              </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-700">New Users Today</span>
-              <span className="font-semibold text-green-600">{stats.systemStats.newUsersToday}</span>
+              <span className="font-semibold text-green-600">
+                {stats.systemStats.newUsersToday}
+              </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-700">System Load</span>
-              <span className="font-semibold text-yellow-600">{stats.systemStats.systemLoad}%</span>
+              <span className="font-semibold text-yellow-600">
+                {stats.systemStats.systemLoad}%
+              </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Add Applicant Form Modal */}
+      <AddApplicantFormModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        onApplicantAdded={onApplicantAdded}
+        refreshKey={refreshKey}
+      />
+
+      {/* Toast Message */}
+      <ToastMessage
+        message={message}
+        isFailed={isFailed}
+        isVisible={isVisible}
+        onClose={closeToastMessage}
+      />
     </div>
   );
 };

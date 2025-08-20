@@ -82,12 +82,12 @@ const AppHeader = () => {
               </button>
               <a href="/dashboard" className="flex ms-2 md:me-24">
                 <img
-                  src="/src/assets/img/AssistaLogo.png"
+                  src="/src/assets/img/assistalogo2.png"
                   className="h-8 me-3"
                   alt="Assista Logo"
                 />
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
-                  iAssista
+                  Assista
                 </span>
               </a>
             </div>
@@ -111,7 +111,8 @@ const AppHeader = () => {
                     ) : (
                       <div className="relative inline-flex items-center justify-center w-8 h-8 text-center text-sm overflow-hidden bg-gray-300 rounded-full">
                         <span className="font-medium text-gray-600">
-                          {user?.user?.last_name?.charAt(0) || ''}{user?.user?.first_name?.charAt(0) || ''}
+                          {user?.user?.last_name?.charAt(0) || ""}
+                          {user?.user?.first_name?.charAt(0) || ""}
                         </span>
                       </div>
                     )}

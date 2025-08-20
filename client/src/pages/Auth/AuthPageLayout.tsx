@@ -1,4 +1,4 @@
-import AssistaLogo from "../../assets/img/AssistaLogo.png";
+import AssistaLogo from "../../assets/img/assistalogo2.png";
 import type { FC, ReactNode } from "react";
 
 interface AuthPageLayoutProps {

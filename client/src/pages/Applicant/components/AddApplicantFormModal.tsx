@@ -1,204 +1,245 @@
-import React, { useState, useEffect, type FC, type FormEvent } from "react";
+import { useEffect, useState, type FC, type FormEvent } from "react";
+import FloatingLabelInput from "../../../components/Input/FloatingLabelInput";
 import Modal from "../../../components/Modal";
+import FloatingLabelSelect from "../../../components/Select/FloatingLabelSelect";
+import SubmitButton from "../../../components/Button/SubmitButton";
+import CloseButton from "../../../components/Button/CloseButton";
+import GenderService from "../../../services/GenderService";
+import CrisisService from "../../../services/CrisisService";
+import SituationService from "../../../services/SituationService";
+import ApplicantService from "../../../services/ApplicantService";
+import type { ApplicantFieldErrors } from "../../../interfaces/ApplicantInterface";
 import type { GenderColumns } from "../../../interfaces/GenderInterface";
 import type { CrisisColumns } from "../../../interfaces/CrisisInterface";
 import type { SituationColumns } from "../../../interfaces/SituationInterface";
-import GenderService from "../../../services/GenderService";
-import crisisService from "../../../services/CrisisService";
-import SituationService from "../../../services/SituationService";
-import ApplicantService from "../../../services/ApplicantService";
-
-// --- START: Self-contained Components and Hooks for compilation ---
-
-// Modal Component (Copied from your provided Modal code)
-
-// FloatingLabelInput Component (Copied from previous responses for self-containment)
-interface FloatingLabelInputProps {
-  label: string;
-  type: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  required?: boolean;
-  autoFocus?: boolean;
-  errors?: string[];
-  className?: string;
-}
-
-const FloatingLabelInput: FC<FloatingLabelInputProps> = ({
-  label,
-  type,
-  name,
-  value,
-  onChange,
-  required = false,
-  autoFocus = false,
-  errors,
-  className = "",
-}) => {
-  return (
-    <div className={`relative ${className}`}>
-      <input
-        type={type}
-        id={name}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        autoFocus={autoFocus}
-        placeholder=" "
-        className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer shadow-sm ${
-          errors && errors.length > 0 ? "border-red-500" : ""
-        }`}
-      />
-      <label
-        htmlFor={name}
-        className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto"
-      >
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {errors && errors.length > 0 && (
-        <p className="mt-2 text-sm text-red-600">{errors[0]}</p>
-      )}
-    </div>
-  );
-};
-
-// FloatingLabelSelect Component (Copied from previous responses for self-containment)
-interface FloatingLabelSelectProps {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  required?: boolean;
-  errors?: string[];
-  children: React.ReactNode;
-  className?: string;
-}
-
-const FloatingLabelSelect: FC<FloatingLabelSelectProps> = ({
-  label,
-  name,
-  value,
-  onChange,
-  required = false,
-  errors,
-  children,
-  className = "",
-}) => {
-  return (
-    <div className={`relative ${className}`}>
-      <select
-        id={name}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className={`block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer shadow-sm ${
-          errors && errors.length > 0 ? "border-red-500" : ""
-        }`}
-      >
-        {children}
-      </select>
-      <label
-        htmlFor={name}
-        className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto"
-      >
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {errors && errors.length > 0 && (
-        <p className="mt-2 text-sm text-red-600">{errors[0]}</p>
-      )}
-    </div>
-  );
-};
-
-// --- END: Self-contained Components and Hooks ---
+import UploadInput from "../../../components/Input/UploadInput";
 
 interface AddApplicantFormModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   onApplicantAdded: (message: string) => void;
   refreshKey: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
-  isOpen,
-  onClose,
   onApplicantAdded,
   refreshKey,
+  isOpen,
+  onClose,
 }) => {
-  // State for Personal Details
-  const [lastName, setLastName] = useState("");
+  // Loading states
+  const [loadingGenders, setLoadingGenders] = useState(false);
+  const [loadingCrisis, setLoadingCrisis] = useState(false);
+  const [loadingSituations, setLoadingSituations] = useState(false);
+  const [loadingStore, setLoadingStore] = useState(false);
+
+  // Data states
+  const [genders, setGenders] = useState<GenderColumns[]>([]);
+  const [crisisOptions, setCrisisOptions] = useState<CrisisColumns[]>([]);
+  const [situations, setSituations] = useState<SituationColumns[]>([]);
+
+  // Form states - Program
+  const [crisis, setCrisis] = useState("");
+  const [incidentDate, setIncidentDate] = useState("");
+
+  // Form states - Personal Details
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [suffixName, setSuffixName] = useState("");
-  const [genderId, setGenderId] = useState("");
-  const [genders, setGenders] = useState<GenderColumns[]>([]); // Use GenderColumns type
-  const [loadingGenders, setLoadingGenders] = useState(false);
-  const [birthDate, setBirthDate] = useState("");
+  const [gender, setGender] = useState("");
+  const [civilStatus, setCivilStatus] = useState("");
 
-  // State for Contact Information
-  const [contactNumber, setContactNumber] = useState("");
-  const [gmail, setGmail] = useState("");
+  // Form states - Contact Information
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+
+  // Form states - Additional fields (from existing interface)
+  const [birthDate, setBirthDate] = useState("");
   const [houseNo, setHouseNo] = useState("");
   const [street, setStreet] = useState("");
   const [subdivision, setSubdivision] = useState("");
   const [barangay, setBarangay] = useState("");
   const [city, setCity] = useState("");
+  const [situation, setSituation] = useState("");
 
-  // State for Crisis Information
-  const [crisisId, setCrisisId] = useState("");
-  const [crisiss, setCrisiss] = useState<CrisisColumns[]>([]); // Use CrisisColumns type
-  const [loadingCrisiss, setLoadingCrisiss] = useState(false);
-  const [incidentDate, setIncidentDate] = useState("");
-  const [situationId, setSituationId] = useState("");
-  const [situations, setSituations] = useState<SituationColumns[]>([]); // Use SituationColumns type
-  const [loadingSituations, setLoadingSituations] = useState(false);
-
-  // State for Attached File
+  // File and consent states
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [consentAgreed, setConsentAgreed] = useState(false);
 
-  // State for Declaration
-  const [consentGiven, setConsentGiven] = useState(false);
+  const [errors, setErrors] = useState<ApplicantFieldErrors>({});
 
-  // General form submission loading and errors
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formErrors, setFormErrors] = useState<FormError>({});
-  const [submissionMessage, setSubmissionMessage] = useState<string | null>(
-    null
-  );
+  // Civil status options
+  const civilStatusOptions = [
+    { value: "single", label: "Single" },
+    { value: "married", label: "Married" },
+    { value: "divorced", label: "Divorced" },
+    { value: "widowed", label: "Widowed" },
+    { value: "separated", label: "Separated" },
+  ];
 
-  // --- Data Loading Functions ---
+  const validateForm = () => {
+    const newErrors: ApplicantFieldErrors = {};
+
+    // Required field validation
+    if (!crisis) newErrors.crisis = ["The field is required"];
+    if (!incidentDate) newErrors.incident_date = ["The field is required"];
+    if (!firstName) newErrors.first_name = ["The field is required"];
+    if (!lastName) newErrors.last_name = ["The field is required"];
+    if (!gender) newErrors.gender = ["The field is required"];
+    if (!civilStatus) newErrors.civil_status = ["The field is required"];
+    if (!mobileNumber) newErrors.contact_number = ["The field is required"];
+    if (!emailAddress) newErrors.gmail = ["The field is required"];
+    if (!birthDate) newErrors.birth_date = ["The field is required"];
+    if (!houseNo) newErrors.house_no = ["The field is required"];
+    if (!street) newErrors.street = ["The field is required"];
+    if (!barangay) newErrors.barangay = ["The field is required"];
+    if (!city) newErrors.city = ["The field is required"];
+    if (!situation) newErrors.situation = ["The field is required"];
+
+    // Additional validation rules
+    if (mobileNumber && mobileNumber.length !== 11) {
+      newErrors.contact_number = ["Mobile number must be exactly 11 digits"];
+    }
+
+    if (emailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)) {
+      newErrors.gmail = ["Please enter a valid email address"];
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleStoreApplicant = async (e: FormEvent) => {
+    try {
+      e.preventDefault();
+
+      // Client-side validation
+      if (!validateForm()) {
+        return;
+      }
+
+      if (!consentAgreed) {
+        alert("Please agree to the declaration and consent before submitting.");
+        return;
+      }
+
+      setLoadingStore(true);
+
+      const formData = new FormData();
+
+      // Program fields
+      formData.append("crisis", crisis);
+      formData.append("incident_date", incidentDate);
+
+      // Personal Details
+      formData.append("first_name", firstName);
+      formData.append("middle_name", middleName || "");
+      formData.append("last_name", lastName);
+      formData.append("suffix_name", suffixName || "");
+      formData.append("gender", gender);
+      formData.append("birth_date", birthDate);
+
+      // Contact Information
+      formData.append("contact_number", mobileNumber);
+      formData.append("gmail", emailAddress);
+
+      // Address fields (from existing interface)
+      formData.append("house_no", houseNo);
+      formData.append("street", street);
+      formData.append("subdivision", subdivision || "");
+      formData.append("barangay", barangay);
+      formData.append("city", city);
+      formData.append("situation", situation);
+
+      // File attachment
+      if (attachedFile) {
+        formData.append("add_applicant_file", attachedFile);
+      }
+
+      const res = await ApplicantService.storeApplicant(formData);
+
+      if (res.status === 200 || res.status === 201) {
+        // Reset form
+        setCrisis("");
+        setIncidentDate("");
+        setFirstName("");
+        setMiddleName("");
+        setLastName("");
+        setSuffixName("");
+        setGender("");
+        setCivilStatus("");
+        setMobileNumber("");
+        setEmailAddress("");
+        setBirthDate("");
+        setHouseNo("");
+        setStreet("");
+        setSubdivision("");
+        setBarangay("");
+        setCity("");
+        setSituation("");
+        setAttachedFile(null);
+        setConsentAgreed(false);
+        setErrors({});
+
+        onApplicantAdded(res.data.message);
+        refreshKey();
+        onClose();
+      } else {
+        console.error(
+          "Unexpected error occurred during adding applicant: ",
+          res.status
+        );
+      }
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as {
+          response: { status: number; data: { errors: ApplicantFieldErrors } };
+        };
+        if (axiosError.response?.status === 422) {
+          setErrors(axiosError.response.data.errors);
+        } else {
+          console.error(
+            "Unexpected server error occurred during adding applicant: ",
+            error
+          );
+        }
+      } else {
+        console.error(
+          "Unexpected server error occurred during adding applicant: ",
+          error
+        );
+      }
+    } finally {
+      setLoadingStore(false);
+    }
+  };
+
   const handleLoadGenders = async () => {
     try {
       setLoadingGenders(true);
       const res = await GenderService.loadGenders();
       if (res.status === 200) {
         setGenders(res.data.genders);
-      } else {
-        // Handle error without console.error
       }
     } catch (error) {
-      // Handle error without console.error
+      console.error("Error loading genders: ", error);
     } finally {
       setLoadingGenders(false);
     }
   };
 
-  const handleLoadCrisiss = async () => {
+  const handleLoadCrisis = async () => {
     try {
-      setLoadingCrisiss(true);
-      const res = await crisisService.loadCrisiss();
+      setLoadingCrisis(true);
+      const res = await CrisisService.loadCrisiss();
       if (res.status === 200) {
-        setCrisiss(res.data.crisiss);
-      } else {
-        // Handle error without console.error
+        setCrisisOptions(res.data.crisiss || res.data.crisis || []);
       }
     } catch (error) {
-      // Handle error without console.error
+      console.error("Error loading crisis options: ", error);
     } finally {
-      setLoadingCrisiss(false);
+      setLoadingCrisis(false);
     }
   };
 
@@ -207,446 +248,372 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
       setLoadingSituations(true);
       const res = await SituationService.loadSituations();
       if (res.status === 200) {
-        setSituations(res.data.situations);
-      } else {
-        // Handle error without console.error
+        setSituations(res.data.situations || []);
       }
     } catch (error) {
-      // Handle error without console.error
+      console.error("Error loading situations: ", error);
     } finally {
       setLoadingSituations(false);
     }
   };
 
   useEffect(() => {
-    if (!isOpen) {
-      // Reset form when modal closes
-      setLastName("");
-      setFirstName("");
-      setMiddleName("");
-      setSuffixName("");
-      setGenderId("");
-      setBirthDate("");
-      setContactNumber("");
-      setGmail("");
-      setHouseNo("");
-      setStreet("");
-      setSubdivision("");
-      setBarangay("");
-      setCity("");
-      setCrisisId("");
-      setIncidentDate("");
-      setSituationId("");
-      setAttachedFile(null);
-      setConsentGiven(false);
-      setFormErrors({});
-      setSubmissionMessage(null);
-      return;
+    if (isOpen) {
+      handleLoadGenders();
+      handleLoadCrisis();
+      handleLoadSituations();
     }
-
-    // Call individual load functions when modal opens
-    handleLoadGenders();
-    handleLoadCrisiss();
-    handleLoadSituations();
   }, [isOpen]);
 
-  // --- Form Submission Handler ---
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setFormErrors({});
-    setSubmissionMessage(null);
-
-    if (!consentGiven) {
-      setSubmissionMessage(
-        "Please agree to the privacy consent before submitting."
-      );
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const formData = new FormData();
-
-      // Personal Details
-      formData.append("first_name", firstName);
-      formData.append("middle_name", middleName || "");
-      formData.append("last_name", lastName);
-      formData.append("suffix_name", suffixName || "");
-      formData.append("birth_date", birthDate);
-      formData.append("gender_id", genderId);
-
-      // Contact Information
-      formData.append("contact_number", contactNumber);
-      formData.append("gmail", gmail);
-      formData.append("house_no", houseNo);
-      formData.append("street", street);
-      formData.append("subdivision", subdivision || "");
-      formData.append("barangay", barangay);
-      formData.append("city", city);
-
-      // Crisis Details
-      formData.append("crisis_id", crisisId);
-      formData.append("incident_date", incidentDate);
-      formData.append("situation_id", situationId);
-
-      // Attached File
-      if (attachedFile) {
-        formData.append("add_applicant_file", attachedFile);
-      }
-
-      // Calculate age for backend
-      if (birthDate) {
-        const today = new Date();
-        const birthDateObj = new Date(birthDate);
-        let age = today.getFullYear() - birthDateObj.getFullYear();
-        const m = today.getMonth() - birthDateObj.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
-          age--;
-        }
-        formData.append("age", String(age));
-      }
-
-      const response = await ApplicantService.submitApplicantForm(formData);
-
-      if (response.status === 200) {
-        onApplicantAdded(response.data.message);
-        refreshKey();
-        onClose();
-      } else {
-        setSubmissionMessage(
-          "An unexpected error occurred during registration."
-        );
-      }
-    } catch (error: any) {
-      if (error.response && error.response.status === 422) {
-        setFormErrors(error.response.data.errors);
-        setSubmissionMessage("Please correct the highlighted errors.");
-      } else {
-        setSubmissionMessage("A network error occurred. Please try again.");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} showCloseButton>
-      <form onSubmit={handleSubmit} className="p-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">
-          Crisis Situation Online Registration
-        </h1>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} showCloseButton>
+        <form onSubmit={handleStoreApplicant}>
+          <h1 className="text-2xl border-b border-gray-100 p-4 font-semibold mb-4">
+            File a Grievance Application
+          </h1>
 
-        {submissionMessage && (
-          <div
-            className={`p-4 rounded-lg text-white font-medium mb-4 ${
-              submissionMessage.includes("successfully")
-                ? "bg-green-500"
-                : "bg-red-500"
-            }`}
-          >
-            {submissionMessage}
-          </div>
-        )}
-
-        {/* Section: Personal Details */}
-        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 shadow-sm transition-all duration-300 hover:shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-blue-800 mb-6 border-b pb-3 border-blue-100">
-            👤 Personal Details
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FloatingLabelInput
-              label="Last Name"
-              type="text"
-              name="last_name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-              errors={formErrors.last_name}
-            />
-            <FloatingLabelInput
-              label="First Name"
-              type="text"
-              name="first_name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
-              errors={formErrors.first_name}
-            />
-            <FloatingLabelInput
-              label="Middle Name"
-              type="text"
-              name="middle_name"
-              value={middleName}
-              onChange={(e) => setMiddleName(e.target.value)}
-              errors={formErrors.middle_name}
-            />
-            <FloatingLabelInput
-              label="Suffix Name (e.g., Jr., Sr.)"
-              type="text"
-              name="suffix_name"
-              value={suffixName}
-              onChange={(e) => setSuffixName(e.target.value)}
-              errors={formErrors.suffix_name}
-            />
-            <FloatingLabelInput
-              label="Date of Birth"
-              type="date"
-              name="birth_date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              required
-              errors={formErrors.birth_date}
-            />
-            <FloatingLabelSelect
-              label="Gender"
-              name="gender_id"
-              value={genderId}
-              onChange={(e) => setGenderId(e.target.value)}
-              required
-              errors={formErrors.gender_id}
-            >
-              {loadingGenders ? (
-                <option value="">Loading Genders...</option>
-              ) : (
-                <>
-                  <option value="">Select Gender</option>
-                  {genders.map((genderOpt) => (
-                    <option
-                      key={genderOpt.gender_id}
-                      value={genderOpt.gender_id}
-                    >
-                      {genderOpt.gender}
-                    </option>
-                  ))}
-                </>
-              )}
-            </FloatingLabelSelect>
-          </div>
-        </div>
-
-        {/* Section: Contact Information */}
-        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 shadow-sm transition-all duration-300 hover:shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-blue-800 mb-6 border-b pb-3 border-blue-100">
-            📞 Contact Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FloatingLabelInput
-              label="Contact Number"
-              type="tel"
-              name="contact_number"
-              value={contactNumber}
-              onChange={(e) => setContactNumber(e.target.value)}
-              required
-              errors={formErrors.contact_number}
-            />
-            <FloatingLabelInput
-              label="Gmail"
-              type="email"
-              name="gmail"
-              value={gmail}
-              onChange={(e) => setGmail(e.target.value)}
-              required
-              errors={formErrors.gmail}
-            />
-            <FloatingLabelInput
-              label="House No. / Lot / Block"
-              type="text"
-              name="house_no"
-              value={houseNo}
-              onChange={(e) => setHouseNo(e.target.value)}
-              required
-              errors={formErrors.house_no}
-            />
-            <FloatingLabelInput
-              label="Street"
-              type="text"
-              name="street"
-              value={street}
-              onChange={(e) => setStreet(e.target.value)}
-              required
-              errors={formErrors.street}
-            />
-            <FloatingLabelInput
-              label="Subdivision"
-              type="text"
-              name="subdivision"
-              value={subdivision}
-              onChange={(e) => setSubdivision(e.target.value)}
-              errors={formErrors.subdivision}
-            />
-            <FloatingLabelInput
-              label="Barangay"
-              type="text"
-              name="barangay"
-              value={barangay}
-              onChange={(e) => setBarangay(e.target.value)}
-              required
-              errors={formErrors.barangay}
-            />
-            <FloatingLabelInput
-              label="City / Municipality"
-              type="text"
-              name="city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              required
-              errors={formErrors.city}
-            />
-          </div>
-        </div>
-
-        {/* Section: Crisis Information */}
-        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 shadow-sm transition-all duration-300 hover:shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-blue-800 mb-6 border-b pb-3 border-blue-100">
-            🚨 Crisis Details
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <FloatingLabelSelect
-              label="Type of Crisis"
-              name="crisis_id"
-              value={crisisId}
-              onChange={(e) => setCrisisId(e.target.value)}
-              required
-              errors={formErrors.crisis_id}
-            >
-              {loadingCrisiss ? (
-                <option value="">Loading Crisis Types...</option>
-              ) : (
-                <>
-                  <option value="">Select Crisis Type</option>
-                  {crisiss.map((crisisOpt) => (
-                    <option
-                      key={crisisOpt.crisis_id}
-                      value={crisisOpt.crisis_id}
-                    >
-                      {crisisOpt.crisis}
-                    </option>
-                  ))}
-                </>
-              )}
-            </FloatingLabelSelect>
-            <FloatingLabelInput
-              label="Date of Incident"
-              type="date"
-              name="incident_date"
-              value={incidentDate}
-              onChange={(e) => setIncidentDate(e.target.value)}
-              required
-              errors={formErrors.incident_date}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium text-sm mb-3">
-              Your Current Situation: <span className="text-red-500">*</span>
-            </label>
-            {loadingSituations ? (
-              <p className="text-gray-500">Loading situations...</p>
-            ) : situations.length === 0 ? (
-              <p className="text-gray-500">No situations available.</p>
-            ) : (
-              <div className="flex flex-wrap gap-4">
-                {situations.map((situationOpt) => (
-                  <label
-                    key={situationOpt.situation_id}
-                    className="inline-flex items-center text-gray-800 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="situation_id"
-                      value={situationOpt.situation_id}
-                      checked={situationId === situationOpt.situation_id}
-                      onChange={(e) => setSituationId(e.target.value)}
-                      className="form-radio h-5 w-5 text-blue-600 border-gray-300 rounded-full focus:ring-blue-500 shadow-sm"
-                      required={true}
-                    />
-                    <span className="ml-2">{situationOpt.situation_name}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-            {formErrors.situation_id && (
-              <p className="mt-2 text-sm text-red-600">
-                {formErrors.situation_id[0]}
+          {/* Directions Section */}
+          <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+            <h2 className="text-lg font-semibold text-blue-800 mb-3">
+              DIRECTIONS FOR FILING:
+            </h2>
+            <div className="text-sm text-blue-700 space-y-2">
+              <p>
+                <strong>STEP 1:</strong> Fill out the information requested
+                below. All fields marked with red asterisk (*) are required.
               </p>
-            )}
+              <p>
+                <strong>STEP 2:</strong> After submitting the form below, check
+                your email address for the One-Time PIN (OTP).
+              </p>
+              <p>
+                <strong>STEP 3:</strong> Input the One-Time PIN on the next
+                form. Submit the OTP and wait for notification indicating that
+                your grievance is successfully filed.
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Section: Attached File */}
-        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 shadow-sm transition-all duration-300 hover:shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-blue-800 mb-6 border-b pb-3 border-blue-100">
-            📎 Attached File
-          </h2>
-          <div className="flex items-center space-x-4 mb-4">
-            <input
-              type="file"
-              id="attachedFile"
-              name="add_applicant_file"
-              onChange={(e) =>
-                setAttachedFile(e.target.files ? e.target.files[0] : null)
-              }
-              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600 shadow-sm"
+          {/* Program Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              Program
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <FloatingLabelSelect
+                  label="Crisis Detail *"
+                  name="crisis"
+                  value={crisis}
+                  onChange={(e) => setCrisis(e.target.value)}
+                  required
+                  errors={errors.crisis}
+                >
+                  {loadingCrisis ? (
+                    <option value="">Loading...</option>
+                  ) : (
+                    <>
+                      <option value="">Select Crisis Detail</option>
+                      {crisisOptions.map((crisisOption, index) => (
+                        <option value={crisisOption.crisis_id} key={index}>
+                          {crisisOption.crisis}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </FloatingLabelSelect>
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Date of Incident *"
+                  type="date"
+                  name="incident_date"
+                  value={incidentDate}
+                  onChange={(e) => setIncidentDate(e.target.value)}
+                  required
+                  errors={errors.incident_date}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Personal Details Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              Personal Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <FloatingLabelInput
+                  label="First Name *"
+                  type="text"
+                  name="first_name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  errors={errors.first_name}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Middle Name (Optional)"
+                  type="text"
+                  name="middle_name"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                  errors={errors.middle_name}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Last Name *"
+                  type="text"
+                  name="last_name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  errors={errors.last_name}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Suffix Name (Optional)"
+                  type="text"
+                  name="suffix_name"
+                  value={suffixName}
+                  onChange={(e) => setSuffixName(e.target.value)}
+                  errors={errors.suffix_name}
+                />
+              </div>
+              <div>
+                <FloatingLabelSelect
+                  label="Sex *"
+                  name="gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  required
+                  errors={errors.gender}
+                >
+                  {loadingGenders ? (
+                    <option value="">Loading...</option>
+                  ) : (
+                    <>
+                      <option value="">Select Sex</option>
+                      {genders.map((genderOption, index) => (
+                        <option value={genderOption.gender_id} key={index}>
+                          {genderOption.gender}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </FloatingLabelSelect>
+              </div>
+              <div>
+                <FloatingLabelSelect
+                  label="Civil Status *"
+                  name="civil_status"
+                  value={civilStatus}
+                  onChange={(e) => setCivilStatus(e.target.value)}
+                  required
+                >
+                  <option value="">Select Civil Status</option>
+                  {civilStatusOptions.map((option, index) => (
+                    <option value={option.value} key={index}>
+                      {option.label}
+                    </option>
+                  ))}
+                </FloatingLabelSelect>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Information Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              Contact Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <FloatingLabelInput
+                  label="Mobile Number (11 digits) *"
+                  type="text"
+                  name="mobile_number"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  required
+                  errors={errors.contact_number}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Email Address *"
+                  type="email"
+                  name="email_address"
+                  value={emailAddress}
+                  onChange={(e) => setEmailAddress(e.target.value)}
+                  required
+                  errors={errors.gmail}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Required Fields (from existing interface) */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              Additional Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <FloatingLabelInput
+                  label="Birth Date *"
+                  type="date"
+                  name="birth_date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  required
+                  errors={errors.birth_date}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="House No. *"
+                  type="text"
+                  name="house_no"
+                  value={houseNo}
+                  onChange={(e) => setHouseNo(e.target.value)}
+                  required
+                  errors={errors.house_no}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Street *"
+                  type="text"
+                  name="street"
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
+                  required
+                  errors={errors.street}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Subdivision (Optional)"
+                  type="text"
+                  name="subdivision"
+                  value={subdivision}
+                  onChange={(e) => setSubdivision(e.target.value)}
+                  errors={errors.subdivision}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="Barangay *"
+                  type="text"
+                  name="barangay"
+                  value={barangay}
+                  onChange={(e) => setBarangay(e.target.value)}
+                  required
+                  errors={errors.barangay}
+                />
+              </div>
+              <div>
+                <FloatingLabelInput
+                  label="City *"
+                  type="text"
+                  name="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  errors={errors.city}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <FloatingLabelSelect
+                  label="Current Situation *"
+                  name="situation"
+                  value={situation}
+                  onChange={(e) => setSituation(e.target.value)}
+                  required
+                  errors={errors.situation}
+                >
+                  {loadingSituations ? (
+                    <option value="">Loading...</option>
+                  ) : (
+                    <>
+                      <option value="">Select Current Situation</option>
+                      {situations.map((situationOption, index) => (
+                        <option
+                          value={situationOption.situation_id}
+                          key={index}
+                        >
+                          {situationOption.situation}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </FloatingLabelSelect>
+              </div>
+            </div>
+          </div>
+
+          {/* Attachment Files Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              Attachment Files
+            </h3>
+            <div className="mb-4">
+              <UploadInput
+                label="Attach Supporting Documents (Optional)"
+                name="attached_file"
+                value={attachedFile}
+                onChange={setAttachedFile}
+                errors={errors.add_applicant_file}
+              />
+            </div>
+          </div>
+
+          {/* Declaration & Consent Section */}
+          {/* <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              Declaration & Consent
+            </h3>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="consent"
+                  checked={consentAgreed}
+                  onChange={(e) => setConsentAgreed(e.target.checked)}
+                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  required
+                />
+                <label htmlFor="consent" className="text-sm text-gray-700">
+                  <span className="text-red-500">*</span> I hereby declare that
+                  the information provided above is true and correct to the best
+                  of my knowledge. I understand that any false information may
+                  result in the rejection of my application. I consent to the
+                  processing of my personal data in accordance with the Data
+                  Privacy Act of 2012.
+                </label>
+              </div>
+            </div>
+          </div> */}
+
+          {/* Submit Button */}
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
+            {!loadingStore && <CloseButton label="Cancel" onClose={onClose} />}
+            <SubmitButton
+              label="Submit Application"
+              loading={loadingStore}
+              loadingLabel="Submitting Application..."
             />
-            {attachedFile && (
-              <span className="text-gray-700">{attachedFile.name}</span>
-            )}
           </div>
-          {formErrors.add_applicant_file && (
-            <p className="mt-2 text-sm text-red-600">
-              {formErrors.add_applicant_file[0]}
-            </p>
-          )}
-          <p className="text-sm text-gray-600">
-            NOTE: Please upload files in JPEG or PDF format only
-          </p>
-        </div>
-
-        {/* Section: Declaration and Consent */}
-        <div className="border border-gray-200 rounded-lg p-6 bg-gray-50 shadow-sm transition-all duration-300 hover:shadow-md mb-8">
-          <h2 className="text-2xl font-bold text-blue-800 mb-6 border-b pb-3 border-blue-100">
-            ✅ Declaration & Consent
-          </h2>
-          <div className="flex items-start mb-6">
-            <input
-              type="checkbox"
-              id="consentGiven"
-              name="consentGiven"
-              checked={consentGiven}
-              onChange={(e) => setConsentGiven(e.target.checked)}
-              required
-              className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500 mr-2 mt-1 shadow-sm"
-            />
-            <label
-              htmlFor="consentGiven"
-              className="text-gray-700 text-sm leading-relaxed"
-            >
-              I hereby declare that the information provided is true and correct
-              to the best of my knowledge and belief. I understand that this
-              information will be used to assess my needs for crisis relief and
-              may be shared with relevant government agencies and humanitarian
-              organizations for the purpose of providing assistance.
-            </label>
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className="flex justify-center mt-8">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`px-8 py-4 bg-green-600 text-white font-bold text-lg rounded-full shadow-lg transform transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-400 focus:ring-offset-2 ${
-              isSubmitting
-                ? "opacity-70 cursor-not-allowed"
-                : "hover:bg-green-700 hover:scale-105"
-            }`}
-          >
-            {isSubmitting ? "Submitting..." : "Submit Registration"}
-          </button>
-        </div>
-      </form>
-    </Modal>
+        </form>
+      </Modal>
+    </>
   );
 };
 
