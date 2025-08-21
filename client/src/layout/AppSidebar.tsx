@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { useSidebar } from "../contexts/SidebarContext";
-import { BsSpeedometer2, BsPeople } from "react-icons/bs";
+import { BsPeople } from "react-icons/bs";
+import { LuLayoutDashboard } from "react-icons/lu";
 
 const AppSidebar = () => {
   const { isOpen, toggleSidebar } = useSidebar();
 
   const menuItems = [
     {
-      icon: <BsSpeedometer2 className="w-5 h-5" />,
+      icon: <LuLayoutDashboard className="w-5 h-5" />,
       path: "/dashboard",
       name: "Dashboard",
     },
