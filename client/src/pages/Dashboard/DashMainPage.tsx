@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 const DashMainPage = () => {
   useEffect(() => {
-    document.title = "Dashboard";
+    document.title = "Assista Dashboard";
   }, []);
 
   const {

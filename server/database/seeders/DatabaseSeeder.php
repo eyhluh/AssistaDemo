@@ -48,7 +48,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
-            "first_name" => "Assista",
+            "first_name" => "Assista", //demo only
             "middle_name" => "",
             "last_name" => "Admin",
             "suffix_name" => null,
