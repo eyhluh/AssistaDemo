@@ -43,17 +43,17 @@ class DatabaseSeeder extends Seeder
             ['crisis' => 'Labatory Exam'],
             ['crisis' => 'Rabies'],
             ['crisis' => 'Burial/Funeral'],
-            ['crisis' => 'Medecine Finacial'],
+            ['crisis' => 'Medicine Financial'],
             ['crisis' => 'Hospitalized'],
         ]);
 
         User::factory()->create([
-            "first_name" => "Prince Lorenzo",
-            "middle_name" => "R",
-            "last_name" => "Mentino",
+            "first_name" => "Assista",
+            "middle_name" => "",
+            "last_name" => "Admin",
             "suffix_name" => null,
             "contact_number" => "09123456789",
-            "gmail" => "Assista@gmail.com",
+            "gmail" => "assista@gmail.com",
             "password" => "admin123"
         ]);
 

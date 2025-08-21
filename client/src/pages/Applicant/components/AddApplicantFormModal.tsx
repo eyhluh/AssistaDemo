@@ -277,18 +277,18 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
       <Modal isOpen={isOpen} onClose={onClose} showCloseButton>
         <form onSubmit={handleStoreApplicant}>
           <h1 className="text-2xl border-b border-gray-100 p-4 font-semibold mb-4">
-            File a Application
+            FILE APPLICATION
           </h1>
 
           {/* Directions Section */}
           <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
             <h2 className="text-lg font-semibold text-blue-800 mb-3">
-              DIRECTIONS FOR FILING:
+              DIRECTIONS FOR FILLING:
             </h2>
             <div className="text-sm text-blue-700 space-y-2">
               <p>
-                <strong>STEP 1:</strong> Fill out the information requested
-                below. All fields marked with red asterisk (*) are required.
+                Fill out the information requested below. All fields marked with
+                red asterisk (*) are required.
               </p>
             </div>
           </div>
@@ -298,10 +298,11 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
             <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
               Program
             </h3>
+            {/* <div className="md:col-span-2"> */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <FloatingLabelSelect
-                  label="Crisis Detail *"
+                  label="Assistance Program"
                   name="crisis"
                   value={crisis}
                   onChange={(e) => setCrisis(e.target.value)}
@@ -312,7 +313,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
                     <option value="">Loading...</option>
                   ) : (
                     <>
-                      <option value="">Select Crisis Detail</option>
+                      <option value="">Select Assistance</option>
                       {crisisOptions.map((crisisOption, index) => (
                         <option value={crisisOption.crisis_id} key={index}>
                           {crisisOption.crisis}
@@ -324,12 +325,11 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Date of Incident *"
+                  label="Date of Incident"
                   type="date"
                   name="incident_date"
                   value={incidentDate}
                   onChange={(e) => setIncidentDate(e.target.value)}
-                  required
                   errors={errors.incident_date}
                 />
               </div>
@@ -344,7 +344,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <FloatingLabelInput
-                  label="First Name *"
+                  label="First Name"
                   type="text"
                   name="first_name"
                   value={firstName}
@@ -355,7 +355,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Middle Name (Optional)"
+                  label="Middle Name"
                   type="text"
                   name="middle_name"
                   value={middleName}
@@ -365,7 +365,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Last Name *"
+                  label="Last Name"
                   type="text"
                   name="last_name"
                   value={lastName}
@@ -376,7 +376,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Suffix Name (Optional)"
+                  label="Suffix Name"
                   type="text"
                   name="suffix_name"
                   value={suffixName}
@@ -386,7 +386,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelSelect
-                  label="Sex *"
+                  label="Sex"
                   name="gender"
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
@@ -409,7 +409,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelSelect
-                  label="Civil Status *"
+                  label="Civil Status"
                   name="civil_status"
                   value={civilStatus}
                   onChange={(e) => setCivilStatus(e.target.value)}
@@ -434,7 +434,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <FloatingLabelInput
-                  label="Mobile Number (11 digits) *"
+                  label="Mobile Number"
                   type="text"
                   name="mobile_number"
                   value={mobileNumber}
@@ -445,7 +445,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Email Address *"
+                  label="Email Address"
                   type="email"
                   name="email_address"
                   value={emailAddress}
@@ -465,7 +465,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <FloatingLabelInput
-                  label="Birth Date *"
+                  label="Birth Date"
                   type="date"
                   name="birth_date"
                   value={birthDate}
@@ -476,7 +476,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="House No. *"
+                  label="House No."
                   type="text"
                   name="house_no"
                   value={houseNo}
@@ -487,7 +487,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Street *"
+                  label="Street"
                   type="text"
                   name="street"
                   value={street}
@@ -498,7 +498,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Subdivision (Optional)"
+                  label="Subdivision"
                   type="text"
                   name="subdivision"
                   value={subdivision}
@@ -508,7 +508,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="Barangay *"
+                  label="Barangay"
                   type="text"
                   name="barangay"
                   value={barangay}
@@ -519,7 +519,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div>
                 <FloatingLabelInput
-                  label="City *"
+                  label="City"
                   type="text"
                   name="city"
                   value={city}
@@ -530,7 +530,7 @@ const AddApplicantFormModal: FC<AddApplicantFormModalProps> = ({
               </div>
               <div className="md:col-span-2">
                 <FloatingLabelSelect
-                  label="Current Situation *"
+                  label="Current Situation"
                   name="situation"
                   value={situation}
                   onChange={(e) => setSituation(e.target.value)}

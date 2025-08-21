@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useSidebar } from "../contexts/SidebarContext";
-import { BsSpeedometer2, BsGenderAmbiguous, BsPeople } from "react-icons/bs";
+import { BsSpeedometer2, BsPeople } from "react-icons/bs";
 
 const AppSidebar = () => {
   const { isOpen, toggleSidebar } = useSidebar();

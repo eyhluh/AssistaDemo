@@ -19,7 +19,7 @@ const CrisisMainPage = () => {
   const { refresh, handleRefresh } = useRefresh(false);
 
   useEffect(() => {
-    document.title = "crisis Main Page";
+    document.title = "Crisis";
   }, []);
 
   useEffect(() => {

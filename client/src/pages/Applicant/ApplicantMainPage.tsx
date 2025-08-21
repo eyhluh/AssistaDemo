@@ -11,7 +11,7 @@ import type { ApplicantColumns } from "../../interfaces/ApplicantInterface";
 
 const ApplicantMainPage = () => {
   useEffect(() => {
-    document.title = "Applicant Main Page";
+    document.title = "Applicant";
   }, []);
 
   const [selectedApplicant, setSelectedApplicant] =
