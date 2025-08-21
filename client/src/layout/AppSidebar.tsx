@@ -16,16 +16,16 @@ const AppSidebar = () => {
     //   path: "/genders",
     //   name: "Gender",
     // },
-    {
-      icon: <BsPeople className="w-5 h-5" />,
-      path: "/crisiss",
-      name: "Crisis",
-    },
-    {
-      icon: <BsPeople className="w-5 h-5" />,
-      path: "/situations",
-      name: "Situation",
-    },
+    // {
+    //   icon: <BsPeople className="w-5 h-5" />,
+    //   path: "/crisiss",
+    //   name: "Crisis",
+    // },
+    // {
+    //   icon: <BsPeople className="w-5 h-5" />,
+    //   path: "/situations",
+    //   name: "Situation",
+    // },
     {
       icon: <BsPeople className="w-5 h-5" />,
       path: "/applicants",
